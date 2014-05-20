@@ -2,8 +2,6 @@ var Apiomat = require('vendor/apiomat');
 var moment = require('vendor/moment');
 moment.lang('de');
 
-var myPushDeviceToken = null;
-
 var saveCB = {
 	onOk : function() {
 	},
@@ -15,8 +13,9 @@ var saveCB = {
 // Constructor: ///////////////////////
 ///////////////////////////////////////
 var ApiomatAdapter = function() {
-	this.positioncallback = function() {
-	};
+	this.eventname = 'bikerchanged';
+	var callbacks = arguments[0] || {};
+	// test if online:
 	var xhr = Ti.Network.createHTTPClient({
 		onload : callbacks.ononline,
 		onerror : callbacks.onoffline
@@ -25,10 +24,11 @@ var ApiomatAdapter = function() {
 	xhr.send();
 };
 
-ApiomatAdapter.prototype.startCron = function(_onload) {
-	this.positioncallback = _onload;
-	console.log('Info: cron started');
-	this.cron = setInterval(this.getAllPositions, 60000);
+ApiomatAdapter.prototype.startCron = function(_eventname) {
+	var that = this;
+	this.eventname = _eventname;
+	//this.getAllPositions();
+	this.cron = setInterval(that.getAllPositions, 60000);
 };
 
 ApiomatAdapter.prototype.stopCron = function() {
@@ -39,6 +39,7 @@ ApiomatAdapter.prototype.stopCron = function() {
 ApiomatAdapter.prototype.loginUser = function() {
 	var args = arguments[0] || {}, callbacks = arguments[1] || {}, that = this;
 	var uid = Ti.Utils.md5HexDigest(Ti.Platform.getMacaddress());
+	var that = this;
 	console.log('Info: UID=' + uid);
 	Apiomat.Datastore.setOfflineStrategy(Apiomat.AOMOfflineStrategy.USE_OFFLINE_CACHE, {
 		onOk : function() {
@@ -54,7 +55,8 @@ ApiomatAdapter.prototype.loginUser = function() {
 	var loaded = false;
 	this.user.loadMe({
 		onOk : function() {
-			console.log('Info: loadme OK');
+			console.log('Info: login into apiomat OK');
+			that.getAllPositions();
 		},
 		onError : function(error) {
 			console.log('Warning: ' + error);
@@ -100,7 +102,10 @@ ApiomatAdapter.prototype.getAllPositions = function() {
 					device : that.positions[i].getDevice()
 				});
 			}
-			that.positioncallback && that.positioncallback(positionslist);
+			console.log('Info: bikerchanged ' + positionslist.length);
+			Ti.App.fireEvent(that.eventname, {
+				positions : positionslist
+			});
 
 		},
 		onError : function(error) {

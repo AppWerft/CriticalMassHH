@@ -18,7 +18,9 @@ exports.create = function() {
 	self.add(radlertext);
 	var updateAnnotations = function(_positionslist) {
 		var positions = _positionslist;
-		if (!positions) return;
+		console.log(positions);
+		if (!positions)
+			return;
 		if (annotations.length)
 			self.mapview.removeAllAnnotations();
 		annotations = [];
@@ -44,7 +46,7 @@ exports.create = function() {
 		},
 		animate : true,
 		regionFit : true,
-		userLocation : true
+		userLocation : false
 	});
 
 	self.addEventListener('focus', function() {
@@ -70,9 +72,11 @@ exports.create = function() {
 		};
 		self.remove(micro);
 	};
-	
-	Ti.App.Apiomat.startCron(updateAnnotations);
-	
+	Ti.App.addEventListener('bikerchanged',function(_e) {
+		console.log(_e.positions);
+		updateAnnotations(_e.positions);
+	});
+	Ti.App.Apiomat.startCron('bikerchanged');
 	self.showMicro = function() {
 		micro.animate({
 			bottom : 0,
