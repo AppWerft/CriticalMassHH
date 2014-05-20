@@ -1,6 +1,5 @@
 ! function() {
-	Ti.UI.setBackgroundColor('orange');
-	Ti.App.Sternfahrt = new (require('controls/sternfahrt'))();
+	Ti.App.Sternfahrt = new (require('controls/cmhh'))();
 	Ti.App.Apiomat = new (require('controls/apiomat.adapter'))({
 		ononline : function() {
 			Ti.App.Apiomat.loginUser(null, {

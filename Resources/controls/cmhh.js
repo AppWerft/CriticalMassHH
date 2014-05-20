@@ -1,4 +1,4 @@
-var Sternfahrt = function() {
+var CMHH = function() {
 	this.init();
 	return this;
 };
@@ -9,7 +9,7 @@ const COLORS = {
 	"lgreen" : "#73B532"
 };
 
-Sternfahrt.prototype = {
+CMHH.prototype = {
 	init : function() {
 		var jsonfile = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, '/models/routes.json');
 		var routes = JSON.parse(jsonfile.read());
@@ -28,7 +28,7 @@ Sternfahrt.prototype = {
 				this.routes[i].points.push({
 					latitude : listoflocations[p][0],
 					longitude : listoflocations[p][1]
-				});
+				});   
 			}
 		};
 		return this;
@@ -38,4 +38,4 @@ Sternfahrt.prototype = {
 	},
 	
 };
-module.exports = Sternfahrt;
+module.exports = CMHH;
