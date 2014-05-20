@@ -12,6 +12,14 @@ exports.create = function() {
 		window : require('ui/map.window').create()
 	}), Ti.UI.createTab({
 		icon : Ti.Android ? null : '/assets/map.png',
+		title : 'Videos',
+		window : require('ui/videos.window').create()
+	}),Ti.UI.createTab({
+		icon : Ti.Android ? null : '/assets/map.png',
+		title : 'cmhh@Twitter',
+		window : require('ui/twitter/window').create()
+	}),Ti.UI.createTab({
+		icon : Ti.Android ? null : '/assets/map.png',
 		title : 'FAQ',
 		window : require('ui/faq.window').create()
 	})];

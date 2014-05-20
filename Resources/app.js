@@ -1,5 +1,6 @@
 ! function() {
 	Ti.App.Sternfahrt = new (require('controls/cmhh'))();
+	Ti.App.Twitter = new (require('controls/twitter_adapter'))();
 	Ti.App.Apiomat = new (require('controls/apiomat.adapter'))({
 		ononline : function() {
 			Ti.App.Apiomat.loginUser(null, {
