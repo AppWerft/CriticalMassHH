@@ -56,6 +56,7 @@ ApiomatAdapter.prototype.loginUser = function() {
 	this.user.loadMe({
 		onOk : function() {
 			console.log('Info: login into apiomat OK');
+			callbacks.onOk && callbacks.onOk();
 			that.getAllPositions();
 		},
 		onError : function(error) {
@@ -94,17 +95,17 @@ ApiomatAdapter.prototype.getAllPositions = function() {
 	Apiomat.Position.getPositions(query, {
 		onOk : function(_res) {
 			that.positions = _res;
-			var positionslist = [];
+			var  radlerlist = {};
 			for (var i = 0; i < that.positions.length; i++) {
-				positionslist.push({
+				var user =  that.positions[i].data.ownerUserName;
+				radlerlist[user] = {
 					latitude : that.positions[i].getPositionLatitude(),
 					longitude : that.positions[i].getPositionLongitude(),
-					device : that.positions[i].getDevice()
-				});
+					device : that.positions[i].getDevice(),
+				};
 			}
-			console.log('Info: bikerchanged ' + positionslist.length);
 			Ti.App.fireEvent(that.eventname, {
-				positions : positionslist
+				radler : radlerlist
 			});
 
 		},

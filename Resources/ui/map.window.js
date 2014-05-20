@@ -12,23 +12,25 @@ exports.create = function() {
 		textAlign : 'left',
 		left : 10,
 		bottom : 0,
-		text : ''
+		text : '',
+		font : {
+			fontSize : 10
+		}
 	});
 	self.backgroundColor = 'black';
 	self.add(radlertext);
-	var updateAnnotations = function(_positionslist) {
-		var positions = _positionslist;
-		console.log(positions);
+	var updateAnnotations = function(_radlerlist) {
 		if (!positions)
 			return;
 		if (annotations.length)
 			self.mapview.removeAllAnnotations();
 		annotations = [];
 		radlertext.setText(positions.length + ' Radler');
-		for (var i = 0; i < positions.length; i++) {
+		for (var radlerid  in radlerlist) {
 			annotations.push(Ti.Map.createAnnotation({
-				latitude : positions[i].latitude,
-				longitude : positions[i].longitude,
+				latitude : radlerlist[radlerid].latitude,
+				longitude : radlerlist[radlerid].longitude,
+				title:  radlerlist[radlerid].device,
 				image : '/assets/' + Ti.Platform.displayCaps.density + '.png',
 			}));
 		}
@@ -72,7 +74,7 @@ exports.create = function() {
 		};
 		self.remove(micro);
 	};
-	Ti.App.addEventListener('bikerchanged',function(_e) {
+	Ti.App.addEventListener('bikerchanged', function(_e) {
 		console.log(_e.positions);
 		updateAnnotations(_e.positions);
 	});
