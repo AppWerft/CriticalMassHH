@@ -1,5 +1,5 @@
 exports.start = function() {
-	var e = (arguments[0] || {}, "https://play.google.com/store/apps/details?id=" + Ti.App.getId());
+	var url = "https://play.google.com/store/apps/details?id=" + Ti.App.getId();
 	var xhr = Ti.Network.createHTTPClient({
 		onload : function() {
 			var t = /itemprop="softwareVersion">(.*?)</m.exec(this.responseText);
@@ -12,7 +12,7 @@ exports.start = function() {
 				});
 				r.addEventListener("click", function(_t) {
 					if (_t.index != _t.source.cancel)
-						Ti.Platform.openURL(e);
+						Ti.Platform.openURL(url);
 				}), r.show();
 			} else
 				Ti.Android && Ti.UI.createNotification({
@@ -20,5 +20,5 @@ exports.start = function() {
 				}).show();
 		}
 	});
-	xhr.open("GET", e), xhr.send();
+	xhr.open("GET", url), xhr.send();
 };

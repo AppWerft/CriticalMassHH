@@ -20,7 +20,7 @@
 	alarmManager.addAlarmService({
 		service : 'de.appwerft.cm.Geo_serviceService',
 		minute : 1,
-		interval : 100000
+		interval : 60000
 	});
 	require('vendor/versionsreminder').start();
 }();

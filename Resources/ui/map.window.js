@@ -16,14 +16,17 @@ exports.create = function() {
 	});
 	self.backgroundColor = 'black';
 	self.add(radlertext);
-	var updateAnnotations = function(_positions) {
-		self.mapview.removeAllAnnotations();
+	var updateAnnotations = function(_positionslist) {
+		var positions = _positionslist;
+		if (!positions) return;
+		if (annotations.length)
+			self.mapview.removeAllAnnotations();
 		annotations = [];
-		radlertext.setText(_positions.length + ' Radler');
-		for (var i = 0; i < _positions.length; i++) {
+		radlertext.setText(positions.length + ' Radler');
+		for (var i = 0; i < positions.length; i++) {
 			annotations.push(Ti.Map.createAnnotation({
-				latitude : _positions[i].latitude,
-				longitude : _positions[i].longitude,
+				latitude : positions[i].latitude,
+				longitude : positions[i].longitude,
 				image : '/assets/' + Ti.Platform.displayCaps.density + '.png',
 			}));
 		}
@@ -67,14 +70,9 @@ exports.create = function() {
 		};
 		self.remove(micro);
 	};
-	Ti.App.Apiomat.getAllPositions(null, {
-		onload : updateAnnotations
-	});
-	self.cron = setInterval(function() {
-		Ti.App.Apiomat.getAllPositions(null, {
-			onload : updateAnnotations
-		});
-	}, 100000);
+	
+	Ti.App.Apiomat.startCron(updateAnnotations);
+	
 	self.showMicro = function() {
 		micro.animate({
 			bottom : 0,
@@ -87,7 +85,6 @@ exports.create = function() {
 			duration : 700
 		});
 	};
-
 	return self;
 };
 

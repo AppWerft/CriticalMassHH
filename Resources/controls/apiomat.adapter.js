@@ -15,13 +15,25 @@ var saveCB = {
 // Constructor: ///////////////////////
 ///////////////////////////////////////
 var ApiomatAdapter = function() {
-	var callbacks = arguments[0] || {};
+	this.positioncallback = function() {
+	};
 	var xhr = Ti.Network.createHTTPClient({
 		onload : callbacks.ononline,
 		onerror : callbacks.onoffline
 	});
 	xhr.open('HEAD', 'https://apiomat.org/yambas/rest');
 	xhr.send();
+};
+
+ApiomatAdapter.prototype.startCron = function(_onload) {
+	this.positioncallback = _onload;
+	console.log('Info: cron started');
+	this.cron = setInterval(this.getAllPositions, 60000);
+};
+
+ApiomatAdapter.prototype.stopCron = function() {
+	if (this.cron)
+		clearInterval(this.cron);
 };
 
 ApiomatAdapter.prototype.loginUser = function() {
@@ -60,12 +72,10 @@ ApiomatAdapter.prototype.setPosition = function(args) {
 	var myNewPosition = new Apiomat.Position();
 	myNewPosition.setPositionLatitude(args.latitude);
 	myNewPosition.setPositionLongitude(args.longitude);
+	myNewPosition.setDevice(Ti.Platform.model);
 	myNewPosition.save({
 		onOK : function() {
-			console.log('Info: newPosition.save successful');
-			Ti.Android && Ti.UI.createNotification({
-				message : 'Position erhalten.'
-			}).show();
+			console.log('Info: position successful saved ' + myNewPosition);
 		},
 		onError : function() {
 		}
@@ -73,26 +83,12 @@ ApiomatAdapter.prototype.setPosition = function(args) {
 
 };
 
-ApiomatAdapter.prototype.resetLocation = function() {
+ApiomatAdapter.prototype.getAllPositions = function() {
 	var that = this;
-	that.user.setLocationLatitude(0);
-	that.user.setLocationLongitude(0);
-	that.user.setLocLatitude(0);
-	that.user.setLocLongitude(0);
-	that.user.save({
-		onOk : function() {
-		},
-		onError : function() {
-		}
-	});
-
-};
-
-ApiomatAdapter.prototype.getAllPositions = function(_args, _callbacks) {
-	var that = this;
-	var now = (parseInt(moment().unix()) - 110) * 1000; // letzte 110sec in ms.
+	var now = (parseInt(moment().unix()) - 60) * 1000;
+	// letzte 110sec in ms.
 	var query = "createdAt > date(" + now + ") order by createdAt DESC";
-	console.log(query);
+	console.log('Info: query=' + query);
 	Apiomat.Position.getPositions(query, {
 		onOk : function(_res) {
 			that.positions = _res;
@@ -101,12 +97,15 @@ ApiomatAdapter.prototype.getAllPositions = function(_args, _callbacks) {
 				positionslist.push({
 					latitude : that.positions[i].getPositionLatitude(),
 					longitude : that.positions[i].getPositionLongitude(),
+					device : that.positions[i].getDevice()
 				});
 			}
-			_callbacks.onload(positionslist);
+			that.positioncallback && that.positioncallback(positionslist);
+
 		},
 		onError : function(error) {
-			//handle error
+			console.log('Error: ' + error);
+
 		}
 	});
 
