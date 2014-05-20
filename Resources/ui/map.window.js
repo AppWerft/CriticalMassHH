@@ -20,20 +20,22 @@ exports.create = function() {
 	self.backgroundColor = 'black';
 	self.add(radlertext);
 	var updateAnnotations = function(_radlerlist) {
-		if (!positions)
+		if (!_radlerlist)
 			return;
 		if (annotations.length)
 			self.mapview.removeAllAnnotations();
-		annotations = [];
-		radlertext.setText(positions.length + ' Radler');
-		for (var radlerid  in radlerlist) {
+		annotations = [], count = 0;
+		for (var radlerid in _radlerlist) {
 			annotations.push(Ti.Map.createAnnotation({
-				latitude : radlerlist[radlerid].latitude,
-				longitude : radlerlist[radlerid].longitude,
-				title:  radlerlist[radlerid].device,
+				latitude : _radlerlist[radlerid].latitude,
+				longitude : _radlerlist[radlerid].longitude,
+				title : _radlerlist[radlerid].device,
 				image : '/assets/' + Ti.Platform.displayCaps.density + '.png',
 			}));
+			count++;
 		}
+		radlertext.setText(count + ' Radler');
+
 		self.mapview.addAnnotations(annotations);
 	};
 	self.mapview = Ti.Map.createView({
@@ -75,8 +77,7 @@ exports.create = function() {
 		self.remove(micro);
 	};
 	Ti.App.addEventListener('bikerchanged', function(_e) {
-		console.log(_e.positions);
-		updateAnnotations(_e.positions);
+		updateAnnotations(_e.radler);
 	});
 	Ti.App.Apiomat.startCron('bikerchanged');
 	self.showMicro = function() {

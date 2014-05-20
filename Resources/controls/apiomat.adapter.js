@@ -88,20 +88,20 @@ ApiomatAdapter.prototype.setPosition = function(args) {
 
 ApiomatAdapter.prototype.getAllPositions = function() {
 	var that = this;
-	var now = (parseInt(moment().unix()) - 60) * 1000;
+	var now = (parseInt(moment().unix()) - 120) * 1000;
 	// letzte 110sec in ms.
 	var query = "createdAt > date(" + now + ") order by createdAt DESC";
 	console.log('Info: query=' + query);
 	Apiomat.Position.getPositions(query, {
-		onOk : function(_res) {
-			that.positions = _res;
+		onOk : function(_positions) {
+			var positions = _positions;
 			var  radlerlist = {};
-			for (var i = 0; i < that.positions.length; i++) {
-				var user =  that.positions[i].data.ownerUserName;
+			for (var i = 0; i < positions.length; i++) {
+				var user =  positions[i].data.ownerUserName;
 				radlerlist[user] = {
-					latitude : that.positions[i].getPositionLatitude(),
-					longitude : that.positions[i].getPositionLongitude(),
-					device : that.positions[i].getDevice(),
+					latitude : positions[i].getPositionLatitude(),
+					longitude : positions[i].getPositionLongitude(),
+					device : positions[i].getDevice(),
 				};
 			}
 			Ti.App.fireEvent(that.eventname, {
