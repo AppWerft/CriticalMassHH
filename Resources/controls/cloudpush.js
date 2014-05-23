@@ -5,6 +5,7 @@ exports.init = function() {
 		}).show();
 		return;
 	}
+	var Cloud = require('ti.cloud');
 	var CloudPush = require('ti.cloudpush');
 	CloudPush.clearStatus();
 	var deviceToken = null;
@@ -49,9 +50,7 @@ exports.init = function() {
 			}).show();
 		}
 	});
-	var Cloud = require('ti.cloud');
-	Cloud.debug = false;
-	var deviceToken = null;
+	
 
 	CloudPush.addEventListener('callback', function(evt) {
 		alert(evt.payload);
