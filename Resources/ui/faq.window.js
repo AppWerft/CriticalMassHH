@@ -1,6 +1,8 @@
 exports.create = function() {
 	var self = require('vendor/window').create();
-	self.container = Ti.UI.createTableView({});
+	self.container = Ti.UI.createTableView({
+		backgroundColor : 'w		hite'
+	});
 	self.add(self.container);
 	var faq = require('models/faq');
 	var data = [], i = 0;
@@ -9,7 +11,8 @@ exports.create = function() {
 		data[i] = Ti.UI.createTableViewRow({
 			itemA : faq[q],
 			itemQ : q,
-			hasDetail : true
+			hasDetail : true,
+			backgroundColor : 'white'
 		});
 		data[i].add(Ti.UI.createLabel({
 			text : q,
@@ -31,7 +34,8 @@ exports.create = function() {
 	self.container.addEventListener('click', function(_e) {
 		var win = require('vendor/window').create({
 			title : 'CriticalMass-FAQ',
-			subtitle : _e.row.itemQ
+			subtitle : _e.row.itemQ,
+			backgroundColor : 'white'
 		});
 		var container = Ti.UI.createScrollView({
 			layout : 'vertical',
@@ -46,7 +50,7 @@ exports.create = function() {
 			right : 15,
 			width : Ti.UI.FILL,
 			color : '#333',
-			font : {  
+			font : {
 				fontSize : 20,
 				fontFamily : 'Designosaur'
 			}

@@ -14,13 +14,13 @@ exports.create = function() {
 		icon : Ti.Android ? null : '/assets/map.png',
 		title : 'Videos',
 		window : require('ui/videos.window').create()
-	}),Ti.UI.createTab({
+	}), Ti.UI.createTab({
 		icon : Ti.Android ? null : '/assets/map.png',
-		title : 'cmhh@Twitter',
+		title : 'cmhh @ Twitter',
 		window : require('ui/twitter/window').create()
-	}),Ti.UI.createTab({
+	}), Ti.UI.createTab({
 		icon : Ti.Android ? null : '/assets/map.png',
-		title : 'FAQ',
+		title : 'F.A.Q.',
 		window : require('ui/faq.window').create()
 	})];
 	for (var i = 0; i < tabs.length; i++) {
@@ -33,11 +33,13 @@ exports.create = function() {
 			self.tabs[0].getWindow().hideMicro();
 			if (e.results && e.results.split(',')[0]) {
 				var answer = e.results.split(',')[0];
-				if (answer.toLowerCase() == "klosterstern") {
+				console.log(answer.toLowerCase() + ' ' + Ti.App.Properties.getString('parole'));
+				if (answer.toLowerCase() == Ti.App.Properties.getString('parole')) {
 					menu.getItem(0).visible = false;
 					Ti.UI.createNotification({
-						message : 'Jetzt bist Du angemeldet.'
+						message : 'Jetzt hast Du Prokura.\n\nNun versuche ich Dich beim Nachrichtendienst anzumelden.'
 					}).show();
+					require('controls/cloudpush').init();
 					self.tabs[0].getWindow().setRoute();
 				} else
 					Ti.UI.createNotification({
@@ -47,19 +49,29 @@ exports.create = function() {
 			speechrecognizer.stop();
 		});
 		self.addEventListener("open", function() {
-			Ti.UI.createNotification({
-				message : 'Jetzt die vereinbarte Parole einsprechen.'
-			}).show();
-			self.tabs[0].getWindow().showMicro();
-			setTimeout(function() {
-				self.tabs[0].getWindow().hideMicro();
-			}, 10000);
-			speechrecognizer.setAction(1);
-			speechrecognizer.start();
+			if (Ti.App.Properties.hasProperty('CITY')) {
+				Ti.Android && Ti.UI.createNotification({
+					message : Ti.App.Properties.getString('CITY')
+				}).show();
+			} else
+				require('ui/city.dialog').create(function(_city) {
+					activity.actionBar.setSubtitle(_city);
+				});
+			/*Ti.UI.createNotification({
+			 message : 'Jetzt die vereinbarte Parole einsprechen.'
+			 }).show();
+			 self.tabs[0].getWindow().showMicro();
+			 setTimeout(function() {
+			 self.tabs[0].getWindow().hideMicro();
+			 }, 10000);
+			 speechrecognizer.setAction(1);
+			 speechrecognizer.start();*/
 			var activity = self.getActivity();
 			if (activity && activity.actionBar) {
 				activity.actionBar.setTitle('CriticalMass');
-				activity.actionBar.setSubtitle('Hamburg');
+				activity.actionBar.setSubtitle(Ti.App.Properties.hasProperty('CITY')//
+				? Ti.App.Properties.getString('CITY')//
+				: '');
 				activity.onCreateOptionsMenu = function(e) {
 					menu = e.menu;
 					e.menu.add({
@@ -91,11 +103,20 @@ exports.create = function() {
 							e.menu.getItem(1).checked = true;
 						}
 					});
+					e.menu.add({
+						title : "Stadt wechseln",
+						showAsAction : Ti.Android.SHOW_AS_ACTION_NEVER,
+						itemId : 3,
+						visible : true
+					}).addEventListener("click", function() {
+						require('ui/city.dialog').create(function(_city) {
+							activity.actionBar.setSubtitle(_city);
+						});
+					});
 				};
 			}
 		});
 	}
-
 	return self;
 };
 

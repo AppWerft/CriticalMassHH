@@ -13,7 +13,6 @@ var saveCB = {
 // Constructor: ///////////////////////
 ///////////////////////////////////////
 var ApiomatAdapter = function() {
-	this.eventname = 'bikerchanged';
 	var callbacks = arguments[0] || {};
 	// test if online:
 	var xhr = Ti.Network.createHTTPClient({
@@ -23,19 +22,6 @@ var ApiomatAdapter = function() {
 	xhr.open('HEAD', 'https://apiomat.org/yambas/rest');
 	xhr.send();
 };
-
-ApiomatAdapter.prototype.startCron = function(_eventname) {
-	var that = this;
-	this.eventname = _eventname;
-	//this.getAllPositions();
-	this.cron = setInterval(that.getAllPositions, 60000);
-};
-
-ApiomatAdapter.prototype.stopCron = function() {
-	if (this.cron)
-		clearInterval(this.cron);
-};
-
 ApiomatAdapter.prototype.loginUser = function() {
 	var args = arguments[0] || {}, callbacks = arguments[1] || {}, that = this;
 	var uid = Ti.Utils.md5HexDigest(Ti.Platform.getMacaddress());
@@ -57,7 +43,6 @@ ApiomatAdapter.prototype.loginUser = function() {
 		onOk : function() {
 			console.log('Info: login into apiomat OK');
 			callbacks.onOk && callbacks.onOk();
-			that.getAllPositions();
 		},
 		onError : function(error) {
 			console.log('Warning: ' + error);
@@ -85,13 +70,12 @@ ApiomatAdapter.prototype.setPosition = function(args) {
 	});
 
 };
-
-ApiomatAdapter.prototype.getAllPositions = function() {
+ApiomatAdapter.prototype.getAllRadler = function(_options,_callbacks) {
 	var that = this;
 	var now = (parseInt(moment().unix()) - 120) * 1000;
 	// letzte 110sec in ms.
 	var query = "createdAt > date(" + now + ") order by createdAt DESC";
-	console.log('Info: query=' + query);
+	console.log('Info: QUERY=' + query);
 	Apiomat.Position.getPositions(query, {
 		onOk : function(_positions) {
 			var positions = _positions;
@@ -104,19 +88,12 @@ ApiomatAdapter.prototype.getAllPositions = function() {
 					device : positions[i].getDevice(),
 				};
 			}
-			Ti.App.fireEvent(that.eventname, {
-				radler : radlerlist
-			});
-
+			_callbacks.onOk(radlerlist);
 		},
 		onError : function(error) {
 			console.log('Error: ' + error);
-
+			_callbacks.onError();
 		}
 	});
-
 };
-
-/// SETTER:
-
 module.exports = ApiomatAdapter;

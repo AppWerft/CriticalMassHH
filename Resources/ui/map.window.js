@@ -19,26 +19,7 @@ exports.create = function() {
 	});
 	self.backgroundColor = 'black';
 	self.add(radlertext);
-	var updateAnnotations = function(_radlerlist) {
-		if (!_radlerlist)
-			return;
-		if (annotations.length)
-			self.mapview.removeAllAnnotations();
-		annotations = [], count = 0;
-		for (var radlerid in _radlerlist) {
-			annotations.push(Ti.Map.createAnnotation({
-				latitude : _radlerlist[radlerid].latitude,
-				longitude : _radlerlist[radlerid].longitude,
-				title : _radlerlist[radlerid].device,
-				image : '/assets/' + Ti.Platform.displayCaps.density + '.png',
-			}));
-			count++;
-		}
-		radlertext.setText(count + ' Radler');
-
-		self.mapview.addAnnotations(annotations);
-	};
-	self.mapview = Ti.Map.createView({
+	var mapoptions = {
 		mapType : Ti.Map.TERRAIN_TYPE,
 		bottom : 20,
 		enableZoomControls : false,
@@ -51,15 +32,17 @@ exports.create = function() {
 		animate : true,
 		regionFit : true,
 		userLocation : false
+	};
+	self.mapview = Ti.App.SmartMap.getView(mapoptions);
+	self.mapview.addEventListener('changed', function(_e) {
+		radlertext.setText(_e.text);
 	});
-
 	self.addEventListener('focus', function() {
 		if (!ready) {
 			self.add(self.mapview);
 			ready = true;
 		}
 	});
-
 	var micro = Ti.UI.createImageView({
 		width : Ti.UI.FILL,
 		height : 'auto',
@@ -76,10 +59,7 @@ exports.create = function() {
 		};
 		self.remove(micro);
 	};
-	Ti.App.addEventListener('bikerchanged', function(_e) {
-		updateAnnotations(_e.radler);
-	});
-	Ti.App.Apiomat.startCron('bikerchanged');
+
 	self.showMicro = function() {
 		micro.animate({
 			bottom : 0,
@@ -92,6 +72,8 @@ exports.create = function() {
 			duration : 700
 		});
 	};
+	Ti.App.SmartMap.startCron();
+
 	return self;
 };
 
