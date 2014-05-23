@@ -37,7 +37,7 @@ exports.init = function() {
 		deviceToken = e.deviceToken;
 		Cloud.Users.login({
 			login : 'dummy',
-			password : 'dummy'        
+			password : 'dummy'
 		}, function(e) {
 			if (e.success) {
 				Cloud.PushNotifications.subscribe({
