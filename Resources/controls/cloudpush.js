@@ -19,46 +19,44 @@ exports.init = function() {
 	CloudPush.clearStatus();
 	CloudPush.enabled = true;
 	CloudPush.retrieveDeviceToken({
-		success : deviceTokenSuccess,
-		error : deviceTokenError
-	});
-	var Cloud = require('ti.cloud');
-	Cloud.debug = false;
-	var deviceToken = null;
+		success : function(e) {
+			Ti.App.Properties.setString('deviceToken', e.deviceToken);
+			deviceToken = e.deviceToken;
+			Cloud.Users.login({
+				login : 'dummy',
+				password : 'dummy'
+			}, function(e) {
+				if (e.success) {
+					Cloud.PushNotifications.subscribe({
+						channel : 'criticalmass',
+						device_token : deviceToken,
+						type : 'gcm'
+					}, function(e) {
+						if (e.success) {
+							Ti.UI.createNotification({
+								message : 'Benachichtigungsdienst ist aktiviert.\nDu bekommst jetzt immer rechtzeitig den Treffpunkt zum CriticalMass mitgeteilt.'
+							}).show();
+						} else {
+						}
+					});
 
-	function deviceTokenError(e) {
+				} else {
+				}
+			});
+
+		},
+		error : function (e) {
 		Ti.UI.createNotification({
 			message : 'Problem bei der Anmeldung zum Benachichtigungsdienst'
 		}).show();
 	}
 
-	function deviceTokenSuccess(e) {
-		Ti.App.Properties.setString('deviceToken', e.deviceToken);
-		deviceToken = e.deviceToken;
-		Cloud.Users.login({
-			login : 'dummy',
-			password : 'dummy'
-		}, function(e) {
-			if (e.success) {
-				Cloud.PushNotifications.subscribe({
-					channel : 'criticalmass',
-					device_token : deviceToken,
-					type : 'gcm'
-				}, function(e) {
-					if (e.success) {
-						Ti.UI.createNotification({
-							message : 'Benachichtigungsdienst ist aktiviert.\nDu bekommst jetzt immer rechtzeitig den Treffpunkt zum CriticalMass mitgeteilt.'
-						}).show();
-					} else {
-					}
-				});
+	});
+	var Cloud = require('ti.cloud');
+	Cloud.debug = false;
+	var deviceToken = null;
 
-			} else {
-			}
-		});
-
-	}
-
+	
 
 	CloudPush.addEventListener('callback', function(evt) {
 		alert(evt.payload);
