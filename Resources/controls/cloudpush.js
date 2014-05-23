@@ -6,6 +6,7 @@ exports.init = function() {
 		return;
 	}
 	var CloudPush = require('ti.cloudpush');
+	CloudPush.clearStatus();
 	var deviceToken = null;
 	var options = {
 		showTrayNotificationsWhenFocused : true,
@@ -16,8 +17,6 @@ exports.init = function() {
 	for (var key in options) {
 		CloudPush[key] = options[key];
 	}
-	CloudPush.clearStatus();
-	CloudPush.enabled = true;
 	CloudPush.retrieveDeviceToken({
 		success : function(e) {
 			Ti.App.Properties.setString('deviceToken', e.deviceToken);
@@ -40,23 +39,19 @@ exports.init = function() {
 						}
 					});
 
-				} else {
-				}
+				} 
 			});
 
 		},
-		error : function (e) {
-		Ti.UI.createNotification({
-			message : 'Problem bei der Anmeldung zum Benachichtigungsdienst'
-		}).show();
-	}
-
+		error : function(e) {
+			Ti.UI.createNotification({
+				message : 'Problem bei der Anmeldung zum Benachichtigungsdienst'
+			}).show();
+		}
 	});
 	var Cloud = require('ti.cloud');
 	Cloud.debug = false;
 	var deviceToken = null;
-
-	
 
 	CloudPush.addEventListener('callback', function(evt) {
 		alert(evt.payload);
