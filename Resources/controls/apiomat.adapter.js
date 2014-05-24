@@ -38,6 +38,7 @@ ApiomatAdapter.prototype.loginUser = function() {
 	this.user = new Apiomat.Nutzer();
 	this.user.setUserName(uid);
 	this.user.setPassword('mylittlesecret');
+	this.user.setRegistrationId(Ti.App.Properties.getString('deviceToken'));
 	var loaded = false;
 	this.user.loadMe({
 		onOk : function() {
