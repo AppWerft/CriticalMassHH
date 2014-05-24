@@ -7,17 +7,10 @@ exports.init = function() {
 	}
 	var Cloud = require('ti.cloud');
 	var CloudPush = require('ti.cloudpush');
-	CloudPush.clearStatus();
-	var deviceToken = null;
-	var options = {
-		showTrayNotificationsWhenFocused : true,
-		showTrayNotification : true,
-		focusAppOnPush : false,
-		enabled : true
-	};
-	for (var key in options) {
-		CloudPush[key] = options[key];
-	}
+	CloudPush.debug = true;
+	CloudPush.enabled = true;
+	CloudPush.showTrayNotificationsWhenFocused = true;
+	CloudPush.focusAppOnPush = false;
 	CloudPush.retrieveDeviceToken({
 		success : function(e) {
 			Ti.App.Properties.setString('deviceToken', e.deviceToken);
@@ -28,9 +21,9 @@ exports.init = function() {
 			}, function(e) {
 				if (e.success) {
 					Cloud.PushNotifications.subscribe({
-						channel : 'criticalmass',
+						channel : 'alert',
 						device_token : deviceToken,
-						type : 'gcm'
+						type : 'android'
 					}, function(e) {
 						if (e.success) {
 							Ti.UI.createNotification({
@@ -40,7 +33,7 @@ exports.init = function() {
 						}
 					});
 
-				} 
+				}
 			});
 
 		},
@@ -50,7 +43,6 @@ exports.init = function() {
 			}).show();
 		}
 	});
-	
 
 	CloudPush.addEventListener('callback', function(evt) {
 		alert(evt.payload);
