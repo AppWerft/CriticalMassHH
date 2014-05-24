@@ -1,3 +1,4 @@
+const CHANNEL = 'alert';
 exports.init = function() {
 	if (!Ti.Android || Ti.Platform.Android.API_LEVEL < 13 || Ti.Network.online == false) {
 		Ti.UI.createNotification({
@@ -21,7 +22,7 @@ exports.init = function() {
 			}, function(e) {
 				if (e.success) {
 					Cloud.PushNotifications.subscribe({
-						channel : 'alert',
+						channel : CHANNEL,
 						device_token : deviceToken,
 						type : 'android'
 					}, function(e) {
@@ -30,7 +31,7 @@ exports.init = function() {
 								message : 'Benachichtigungsdienst ist aktiviert.\nDu bekommst jetzt immer rechtzeitig den Treffpunkt zum CriticalMass mitgeteilt.'
 							}).show();
 							Cloud.PushNotifications.notify({
-								channel : 'alert',
+								channel : CHANNEL,
 								friends : true,
 								payload : {
 									alert : 'Ein neuer Radler mit einem ' + Ti.Platform.getModel() + ' hat sich zu CM  angemeldet',
@@ -42,7 +43,7 @@ exports.init = function() {
 								if (e.success) {
 									console.log('Info: push notification succed.');
 									Ti.UI.createNotification({
-										message : 'Andere Radler sind informiert'
+										message : 'Andere Radler sind informiert.'
 									}).show();
 								} else {
 									console.log('Error:\n' + ((e.error && e.message) || JSON.stringify(e)));

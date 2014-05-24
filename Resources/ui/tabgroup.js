@@ -37,7 +37,7 @@ exports.create = function() {
 				if (answer.toLowerCase() == Ti.App.Properties.getString('parole')) {
 					menu.getItem(0).visible = false;
 					Ti.UI.createNotification({
-						message : 'Jetzt hast Du Prokura.\n\nNun versuche ich Dich beim Nachrichtendienst anzumelden.'
+						message : 'OK, habe ich verstanden,\n\nnun versuche ich Dich beim Nachrichtendienst anzumelden.'
 					}).show();
 					require('controls/cloudpush').init();
 					self.tabs[0].getWindow().setRoute();
