@@ -1,4 +1,6 @@
-const CHANNEL = 'alert';
+const ALERT = 'alert';
+const CHAT = 'chat';
+
 exports.init = function() {
 	if (!Ti.Android || Ti.Platform.Android.API_LEVEL < 13 || Ti.Network.online == false) {
 		Ti.UI.createNotification({
@@ -7,9 +9,9 @@ exports.init = function() {
 		return;
 	}
 	var Cloud = require('ti.cloud');
+	Cloud.debug = false;
 	var CloudPush = require('ti.cloudpush');
-	CloudPush.debug = true;
-	CloudPush.enabled = true;
+	//CloudPush.enabled = true;
 	CloudPush.showTrayNotificationsWhenFocused = true;
 	CloudPush.focusAppOnPush = false;
 	CloudPush.retrieveDeviceToken({
@@ -22,7 +24,7 @@ exports.init = function() {
 			}, function(e) {
 				if (e.success) {
 					Cloud.PushNotifications.subscribe({
-						channel : CHANNEL,
+						channel : ALERT,
 						device_token : deviceToken,
 						type : 'android'
 					}, function(e) {
@@ -31,12 +33,14 @@ exports.init = function() {
 								message : 'Benachichtigungsdienst ist aktiviert.\nDu bekommst jetzt immer rechtzeitig den Treffpunkt zum CriticalMass mitgeteilt.'
 							}).show();
 							Cloud.PushNotifications.notify({
-								channel : CHANNEL,
+								channel : ALERT,
 								friends : true,
 								payload : {
-									alert : 'Ein neuer Radler mit einem ' + Ti.Platform.getModel() + ' hat sich zu CM  angemeldet',
-									title : 'A new cycler has subscribed.',
-									badget : 1,
+									alert : 'Ein Radler mit einem ' + Ti.Platform.getModel() + ' hat sich zu cmHH angemeldet',
+									title : 'cmHH hat einen neuen Mitmacher.',
+									badget : '+1',
+									sound : 'klingel',
+									icon : 'ic_pn_newuser',
 									vibrate : true
 								}
 							}, function(e) {
@@ -67,13 +71,13 @@ exports.init = function() {
 	});
 
 	CloudPush.addEventListener('callback', function(evt) {
-		alert(evt.payload);
+		//	alert(evt.payload);
 	});
 	CloudPush.addEventListener('trayClickLaunchedApp', function(evt) {
-		Ti.API.info('Tray Click Launched App (app was not running)');
+		//Ti.API.info('Tray Click Launched App (app was not running)');
 	});
 	CloudPush.addEventListener('trayClickFocusedApp', function(evt) {
-		Ti.API.info('Tray Click Focused App (app was already running)');
+		//Ti.API.info('Tray Click Focused App (app was already running)');
 	});
 };
 

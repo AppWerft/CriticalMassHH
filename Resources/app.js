@@ -1,5 +1,6 @@
 ! function() {
 	Ti.App.Sternfahrt = new (require('controls/cmhh'))();
+	Ti.App.Speechrecognizer = require('jp.isisredirect.speechrecognizer');
 	Ti.App.Twitter = new (require('controls/twitter_adapter'))();
 	Ti.App.SmartMap = new (require('ui/smartmap.widget'))();
 	

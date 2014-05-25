@@ -7,7 +7,7 @@ exports.create = function() {
 	});
 	self.tweetList = Ti.UI.createTableView({
 		height : Ti.UI.FILL,
-		backgroundColor : '#fff'
+		backgroundColor : 'black'
 	});
 
 	self.tweetList.addEventListener('click', function(_e) {

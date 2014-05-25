@@ -5,7 +5,7 @@ exports.create = function() {
 		var self = Ti.UI.createView({
 			height : Ti.UI.SIZE,
 			opacity : (Ti.Android) ? 0.5 : 1,
-			backgroundColor : 'white',
+			backgroundColor : 'black',
 			borderWidth : 0.4,
 			barColor : '#CF6500',
 			borderColor : 'gray',
@@ -35,7 +35,7 @@ exports.create = function() {
 			height : Ti.UI.SIZE,
 			touchEnabled : false,
 			text : _v.title,
-			color : '#444',
+			color : '#ddd',
 			font : {
 				fontWeight : 'bold',
 				fontSize : 19,
@@ -51,7 +51,7 @@ exports.create = function() {
 			width : Ti.UI.FILL,
 			height : Ti.UI.SIZE,
 			//text : 'Laufzeit: ' + _v.duration,
-			color : '#222',
+			color : '#ddd',
 			font : {
 				fontSize : 12,
 				fontFamily : 'Designosaur'
@@ -72,9 +72,9 @@ exports.create = function() {
 					textAlign : 'left',
 					width : Ti.UI.FILL,
 					height : Ti.UI.SIZE,
-					bottom : 5,
+					bottom : 15,
 					text : _res.meta.description,
-					color : '#222',
+					color : '#aaa',
 					font : {
 						fontSize : 14,
 						fontFamily : 'Designosaur'
