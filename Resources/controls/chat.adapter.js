@@ -5,6 +5,7 @@ var Chat = function() {
 Chat.prototype = {
 	register : function(_callbacks) {
 		var that = this;
+		this.userid = Ti.Utils.md5HexDigest(Ti.Platform.getMacaddress()).substring(0, 7);
 		this.cloud = require('ti.cloud');
 		this.cloud.Users.login({
 			login : 'dummy',
@@ -22,72 +23,51 @@ Chat.prototype = {
 						}).show();
 						_callbacks.registered();
 					} else {
-						console.log('Error: subsribing of channel failed');
+						alert('Error: subsribing of channel failed');
 					}
 				});
 			}
 		});
 		var CloudPush = require('ti.cloudpush');
-		//CloudPush.enabled = true;
-		CloudPush.showTrayNotificationsWhenFocused = false;
-		CloudPush.focusAppOnPush = false;
 		CloudPush.addEventListener('callback', function(evt) {
-			console.log('Info: callback in chat ===============================');
-			var chattext = JSON.parse(evt.payload);
-			if (chattext)
-				_callbacks.received(chattext);
+			var payload = JSON.parse(evt.payload);
+			var ich = false;
+			if (payload) {
+				if (that.userid == payload.userid) {
+					payload.device = 'ICH';
+					ich = true;
+				}
+				if (payload.chattext)
+					_callbacks.received(payload);
+			}
 		});
 	},
 	unregister : function() {
 	},
 	write : function(text) {
+		var that = this;
 		this.cloud.PushNotifications.notify({
 			channel : CHAT,
-			friends : true,
+			friends : "true",
+			"to_ids" : "everyone",
 			payload : {
 				chattext : text,
 				sound : 'default',
 				title : text,
+				userid : that.userid,
 				icon : 'ic_pn_newuser',
 				android : {
 					vibrate : true
 				},
-				device : Ti.Platform.model.replace(' ','')
+				device : Ti.Platform.model.replace(' ', '')
 			}
 		}, function(e) {
 			if (e.success) {
 				console.log('Info: chat write succed.');
-
 			} else {
-				console.log('Error:\n' + ((e.error && e.message) || JSON.stringify(e)));
+				alert('Error:\n' + ((e.error && e.message) || JSON.stringify(e)));
 			}
 		});
 	}
 };
-
 module.exports = Chat;
-
-var example = {
-	"type" : "callback",
-	"source" : {
-		"pushType" : "gcm",
-		"invocationAPIs" : [],
-		"bubbleParent" : true,
-		"showTrayNotification" : true,
-		"enabled" : false,
-		"__propertiesDefined__" : true,
-		"singleCallback" : false,
-		"_events" : {
-			"callback" : [{}, {}, {}],
-			"trayClickLaunchedApp" : {},
-			"trayClickFocusedApp" : {}
-		},
-		"focusAppOnPush" : false,
-		"showAppOnTrayClick" : true,
-		"showTrayNotificationsWhenFocused" : false,
-		"apiName" : "Ti.Module"
-	},
-	"payload" : "{\"android\":{\"alert\":\"aaaaaaaaa\"}}",
-	"bubbles" : false,
-	"cancelBubble" : false
-};

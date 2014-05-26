@@ -3,11 +3,15 @@ exports.get = function(self) {
 		var speechrecognizer = Ti.App.Speechrecognizer.createSpeechRecognizer();
 		speechrecognizer.setLangtag('de-DE');
 		speechrecognizer.addEventListener(Ti.App.Speechrecognizer.RESULTS, function(e) {
+			console.log('Info: speechrecognizer received something ' + e);
 			self.tabs[0].getWindow().hideMicro();
 			if (e.results && e.results.split(',')[0]) {
 				var answer = e.results.split(',')[0];
 				if (answer.toLowerCase() == Ti.App.Properties.getString('parole')) {
-					menu.getItem(0).visible = false;
+					menu.findItem("0").setVisible(false);
+					menu.findItem("5").setVisible(true);
+					menu.findItem("7").setVisible(true);
+
 					Ti.UI.createNotification({
 						message : 'OK, habe ich verstanden – nun versuche ich Dich beim Nachrichtendienst anzumelden.'
 					}).show();
@@ -61,6 +65,7 @@ exports.get = function(self) {
 						self.tabs[0].getWindow().showMicro();
 						speechrecognizer.setAction(1);
 						speechrecognizer.start();
+						setTimeout(self.tabs[0].getWindow().hideMicro,100000);
 					});
 				}
 				e.menu.add({
@@ -89,17 +94,17 @@ exports.get = function(self) {
 						activity.actionBar.setSubtitle(_city);
 					});
 				});
-				if (Ti.App.Properties.hasProperty('USER')) {
-					e.menu.add({
-						title : "Treffpunkt bekanntgeben",
-						showAsAction : Ti.Android.SHOW_AS_ACTION_NEVER,
-						itemId : 4,
-						visible : true
-					}).addEventListener("click", function() {
+				e.menu.add({
+					title : "Treffpunkt bekanntgeben",
+					visible : false,
+					showAsAction : Ti.Android.SHOW_AS_ACTION_NEVER,
+					itemId : "7",
+					visible : true
+				}).addEventListener("click", function() {
+					require('ui/admin.window').create().open();
+					
+				});
 
-					});
-
-				}
 			};
 		}
 	}

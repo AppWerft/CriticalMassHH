@@ -35,6 +35,7 @@ exports.init = function() {
 							Cloud.PushNotifications.notify({
 								channel : ALERT,
 								friends : true,
+								"to_ids" : "everyone",
 								payload : {
 									alert : 'Ein Radler mit einem ' + Ti.Platform.getModel() + ' hat sich zu cmHH angemeldet',
 									title : 'cmHH hat einen neuen Mitmacher.',
@@ -80,4 +81,17 @@ exports.init = function() {
 		//Ti.API.info('Tray Click Focused App (app was already running)');
 	});
 };
+
+var fromdevice = {
+	"version" : "v1",
+	"friends" : "1",
+	"channel" : "chat",
+	"payload" : "{\"chattext\":\"test\",\"sound\":\"default\",\"title\":\"test\",\"userid\":\"19fd7b3b0e56e4df91c17ebb9eb8fc0b\",\"icon\":\"ic_pn_newuser\",\"android\":{\"vibrate\":true},\"device\":\"Nexus5\"}",
+	"key" : "0gik53G7gLLbjll5uAVbkaFodx5HWYaL",
+	"action" : "notify",
+	"controller" : "push_notification",
+	"format" : "json",
+	"suppress_response_codes" : "true",
+	"_session_id" : "rzJ-HSU6U0aa25RcK0rWlWE6BfA"
+}; 
 
