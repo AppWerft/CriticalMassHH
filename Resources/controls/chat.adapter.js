@@ -29,10 +29,11 @@ Chat.prototype = {
 			}
 		});
 		var CloudPush = require('ti.cloudpush');
-		CloudPush.addEventListener('callback', function(evt) {
-			var payload = JSON.parse(evt.payload);
+		CloudPush.addEventListener('callback', function(_push) {
+			console.log(_push);
+			var payload = JSON.parse(_push.payload);
 			var ich = false;
-			if (payload) {
+			if (payload && payload.chattext) {
 				if (that.userid == payload.userid) {
 					payload.device = 'ICH';
 					ich = true;
@@ -40,6 +41,7 @@ Chat.prototype = {
 				if (payload.chattext)
 					_callbacks.received(payload);
 			}
+
 		});
 	},
 	unregister : function() {
@@ -71,3 +73,4 @@ Chat.prototype = {
 	}
 };
 module.exports = Chat;
+

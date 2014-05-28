@@ -2,7 +2,11 @@ exports.create = function(_callback) {
 	if (Ti.App.Properties.hasProperty('ADMIN')) {
 		_callback(true);
 		return;
-	}	
+	}
+	var player = Ti.Media.createSound({
+		url : "/assets/knack.caf"
+	});
+	var unlocked = false;
 	var androidview = Ti.UI.createView({
 		layout : 'horizontal',
 		width : '33.3%',
@@ -10,11 +14,28 @@ exports.create = function(_callback) {
 	});
 	var Gears = [], gearviews = [];
 	function getGearView(i) {
-		Gears[i] = new (require('ui/compass.widget'))();
+		Gears[i] = new (require('ui/compass.widget'))(function() {
+			// callback during rotation
+			var sum = '';
+
+			for (var j = 0; j < 3; j++) {
+				sum += ('.' + Gears[j].getValue());
+			}
+			if (sum == '.12.20.49') {
+				player.release();
+				player.url = '/assets/unlock.mp3';
+				player.play();
+				unlocked = true;
+				for (var j = 0; j < 3; j++) {
+					Gears[j].stop();
+				}
+			}
+		});
 		gearviews[i] = Gears[i].getView();
 		gearviews[i].addEventListener('click', function() {
-			for (var j = 0; j < 3; j++)
+			for (var j = 0; j < 3; j++) {
 				Gears[j].stop();
+			}
 			Gears[i].toggle();
 		});
 		return gearviews[i];
@@ -23,22 +44,13 @@ exports.create = function(_callback) {
 	for (var i = 0; i < 3; i++) {
 		androidview.add(getGearView(i));
 	}
-	Gears[0].toggle();
-	var finger = Ti.UI.createImageView({
-		height : 90,
-		width : 60,
-		left : 0,
-		image : '/assets/finger.png'
-	});
-	finger.addEventListener('longpress', function() {
-		Ti.Media.vibrate();
-	});
-	//androidview.add(finger);
-
+	setTimeout(function() {
+		Gears[0].toggle();
+	}, 10);
 	var self = Ti.UI.createAlertDialog({
 		androidView : androidview,
-		buttonNames : ['Kennwort testen und weiter zur Verwaltung'],
-		message : "Stell' die drei Zahräder auf die vereinbarte Kennziffer ein!",
+		buttonNames : ['Treffpunkt senden'],
+		message : "Stell' die drei Zahnräder auf die vereinbarte Kennziffer ein!",
 		title : 'Anmeldung als Bestimmer'
 	});
 	self.addEventListener('click', function() {
@@ -46,8 +58,8 @@ exports.create = function(_callback) {
 		for (var i = 0; i < 3; i++) {
 			res += parseInt(Gears[i].getValue());
 		}
-		if (res > 99 && 	res < 1000) {
-			Ti.App.Properties.setString('ADMIN',new Date());
+		if (unlocked == true) {
+			Ti.App.Properties.setString('ADMIN', new Date());
 			_callback(true);
 		}
 

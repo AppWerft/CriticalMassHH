@@ -43,6 +43,18 @@ exports.create = function() {
 			ready = true;
 		}
 	});
+	if (Ti.App.Properties.hasProperty('USER') && Ti.App.Properties.hasProperty('POSITION')) {
+		var payload = Ti.App.Properties.getObject('POSITION');
+		var pin = Ti.Map.createAnnotation({
+			latitude : payload.latlng.split(',')[0],
+			longitude : payload.latlng.split(',')[1],
+			title : payload.title,
+			subtitle : payload.alert
+		});
+		self.mapview.addAnnotation(pin);
+		self.mapview.selectAnnotation(pin);
+	}
+	
 	var micro = Ti.UI.createImageView({
 		width : Ti.UI.FILL,
 		height : 'auto',

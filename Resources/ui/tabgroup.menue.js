@@ -11,12 +11,21 @@ exports.get = function(self) {
 					menu.findItem("0").setVisible(false);
 					menu.findItem("5").setVisible(true);
 					menu.findItem("7").setVisible(true);
-
 					Ti.UI.createNotification({
 						message : 'OK, habe ich verstanden – nun versuche ich Dich beim Nachrichtendienst anzumelden.'
 					}).show();
 					Ti.App.Properties.setString('USER', new Date());
-					require('controls/cloudpush').init();
+					Ti.App.CloudPush.push2channel('alert', {
+						alert : 'Ein Radler mit einem ' + Ti.Platform.getModel() + ' hat sich zur CM angemeldet',
+						title : 'CM hat einen neuen Mitmacher.',
+						badget : '+1',
+						sound : 'klingel',
+						icon : 'ic_pn_newuser',
+						vibrate : true
+					}, function(_e) {
+					});
+					Ti.App.CloudPush.subscribeChannel('alert', function(_e) {
+					});
 					self.tabs[0].getWindow().setRoute();
 				} else
 					Ti.UI.createNotification({
@@ -65,7 +74,7 @@ exports.get = function(self) {
 						self.tabs[0].getWindow().showMicro();
 						speechrecognizer.setAction(1);
 						speechrecognizer.start();
-						setTimeout(self.tabs[0].getWindow().hideMicro,100000);
+						setTimeout(self.tabs[0].getWindow().hideMicro, 100000);
 					});
 				}
 				e.menu.add({
@@ -102,7 +111,7 @@ exports.get = function(self) {
 					visible : true
 				}).addEventListener("click", function() {
 					require('ui/admin.window').create().open();
-					
+
 				});
 
 			};

@@ -21,14 +21,15 @@ exports.get = function(latlng, _callback) {
 					res.number = '';
 				if (!res.street)
 					res.street = '';
-				_callback(res);
-			}
-			_callback(null);
+				_callback(res.city +' '+res.street + ' ' + res.number);return;
+			} else
+				
+			_callback('x');
 		},
 		onerror : function() {
-			_callback(null);
+			_callback('X');
 		}
 	});
 	xhr.open('GET', url, true);
 	xhr.send();
-}
+};

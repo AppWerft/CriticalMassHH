@@ -1,6 +1,8 @@
 const ALERT = 'alert';
 const CHAT = 'chat';
 
+var Cloud = require('ti.cloud');
+
 exports.init = function() {
 	if (!Ti.Android || Ti.Platform.Android.API_LEVEL < 13 || Ti.Network.online == false) {
 		Ti.UI.createNotification({
@@ -8,12 +10,12 @@ exports.init = function() {
 		}).show();
 		return;
 	}
-	var Cloud = require('ti.cloud');
+
 	Cloud.debug = false;
 	var CloudPush = require('ti.cloudpush');
-	//CloudPush.enabled = true;
 	CloudPush.showTrayNotificationsWhenFocused = true;
 	CloudPush.focusAppOnPush = false;
+	CloudPush.showTrayNotification = true;
 	CloudPush.retrieveDeviceToken({
 		success : function(e) {
 			Ti.App.Properties.setString('deviceToken', e.deviceToken);
@@ -71,27 +73,68 @@ exports.init = function() {
 		}
 	});
 
-	CloudPush.addEventListener('callback', function(evt) {
-		//	alert(evt.payload);
+	CloudPush.addEventListener('callback', function(_payload) {
+		console.log(_payload);
+		var payload = JSON.parse(_payload.payload);
+		if (payload.latlng) {
+			console.log(JSON.stringify(payload));
+			Ti.App.Properties.setObject('POSITION', payload);
+			Ti.App.fireEvent('newposition', payload);
+		}
 	});
-	CloudPush.addEventListener('trayClickLaunchedApp', function(evt) {
-		//Ti.API.info('Tray Click Launched App (app was not running)');
+	CloudPush.addEventListener('trayClickLaunchedApp', function(_payload) {
+		Ti.API.info('Tray Click Launched App (app was not running)');
 	});
-	CloudPush.addEventListener('trayClickFocusedApp', function(evt) {
-		//Ti.API.info('Tray Click Focused App (app was already running)');
+	CloudPush.addEventListener('trayClickFocusedApp', function(_payload) {
+		console.log(_payload.payload);
+		var payload = JSON.parse(_payload.payload);
+		if (JSON.parse(payload).latlng) {
+			var dialog = Ti.UI.createAlertDialog({
+				message : "Neuer Treffpunkt: " + payload.address + '\n' + payload.text,
+				title : 'Neue Position'
+			}).show();
+		}
+		Ti.API.info('Tray Click Focused App (app was already running)');
 	});
 };
 
-var fromdevice = {
-	"version" : "v1",
-	"friends" : "1",
-	"channel" : "chat",
-	"payload" : "{\"chattext\":\"test\",\"sound\":\"default\",\"title\":\"test\",\"userid\":\"19fd7b3b0e56e4df91c17ebb9eb8fc0b\",\"icon\":\"ic_pn_newuser\",\"android\":{\"vibrate\":true},\"device\":\"Nexus5\"}",
-	"key" : "0gik53G7gLLbjll5uAVbkaFodx5HWYaL",
-	"action" : "notify",
-	"controller" : "push_notification",
-	"format" : "json",
-	"suppress_response_codes" : "true",
-	"_session_id" : "rzJ-HSU6U0aa25RcK0rWlWE6BfA"
-}; 
+exports.sendPosition = function(_message, callback) {
+	var CloudPush = require('ti.cloudpush');
+	//CloudPush.showTrayNotificationsWhenFocused = true;
+	//CloudPush.focusAppOnPush = false;
+	//CloudPush.showTrayNotification = true;
+	Cloud.Users.login({
+		login : 'dummy',
+		password : 'dummy'
+	}, function(_e) {
+		if (_e.success) {
+			console.log('Info: sendPosition successful login int ACS');
+			var payload = {
+				alert : (_message.text) || null,
+				title : _message.address,
+				latlng : _message.latlng,
+				android : {
+					vibrate : true
+				},
+				timestamp : new Date(),
+				icon : 'ic_pn_newuser'
+			};
+			Cloud.PushNotifications.notify({
+				channel : ALERT,
+				friends : true,
+				"to_ids" : "everyone",
+				payload : payload
+			}, function(e) {
+				if (e.success) {
+					console.log('Info: push notification succed.');
+					Ti.UI.createNotification({
+						message : 'Alle  Radler sind informiert.'
+					}).show();
+				}
+				callback(e);
+			});
+		} else
+			console.log('Error: login into ACS as dummy');
+	});
+};
 

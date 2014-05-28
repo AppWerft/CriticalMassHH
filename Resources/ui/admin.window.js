@@ -3,8 +3,40 @@ exports.create = function() {
 		title : 'CriticalMass ' + Ti.App.Properties.getString('CITY'),
 		subtitle : 'Bestimmerbereich'
 	});
-	self.layout = 'vertical', Ti.Map = require('ti.map');
-	self.add(Ti.UI.createLabel({
+	Ti.Map = require('ti.map');
+	function getAddress(_latitude,_longitude) {
+		require('vendor/geo.reverseresolve').get(_latitude + ',' + _longitude, function(_res) {
+			self.location.text = _res;
+			message.address = _res;
+			message.latlng = _latitude + ',' + _longitude;
+		});
+	}
+
+	var message = {
+		latlng : '',
+		address : '',
+		text : ''
+	};
+	self.container = Ti.UI.createView({
+		backgroundColor : 'black',
+		layout : 'vertical',
+		bottom : 20
+	});
+	self.add(self.container);
+	self.location = Ti.UI.createLabel({
+		height : 20,
+		bottom : 0,
+		textAlign : 'left',
+		left : 10,
+		font : {
+			fontSize : 12
+		},
+		width : Ti.UI.FILL,
+		color : 'orange',
+		text : 'Standort der Abfahrt'
+	});
+	self.add(self.location);
+	self.container.add(Ti.UI.createLabel({
 		top : 0,
 		color : 'white',
 		left : 10,
@@ -16,9 +48,9 @@ exports.create = function() {
 		text : 'Hier kannst Du den Startpunkt der Fahrt festlegen. Ziehe einfach den Pin zum Treffpunkt'
 	}));
 	self.mapview = Ti.Map.createView({
-		mapType : Ti.Map.TERRAIN_TYPE,
+		mapType : Ti.Map.NORMAL_TYPE,
 		top : 0,
-		bottom : 70,
+		bottom : 20,
 		enableZoomControls : false,
 		region : {
 			latitude : 53.553270540,
@@ -27,6 +59,7 @@ exports.create = function() {
 			longitudeDelta : 0.1
 		},
 		animate : false,
+		traffic : true,
 		regionFit : true,
 		userLocation : false
 	});
@@ -34,10 +67,10 @@ exports.create = function() {
 		color : '#eee',
 		left : 0,
 		width : Ti.UI.FILL,
-		height : 50,
+		height : 45,
 		returnKeyType : Ti.UI.RETURNKEY_GO,
 		hintText : 'Textnachricht an Teilnehmer …',
-		bottom : 0,
+		top : 0,
 		font : {
 			fontSize : 20,
 			fontFamily : 'LW'
@@ -45,41 +78,14 @@ exports.create = function() {
 		backgroundColor : 'black',
 		enableReturnKey : true
 	});
-	self.add(self.input);
-	self.location = Ti.UI.createLabel({
-		height : 20,
-		top : 0,textAlign:'left',left:10,
-		color : 'white',
-		text : 'Standort'
-	});
-	
-	Ti.Geolocation.getCurrentPosition(function(_e) {
-		if (_e.success) {
-			require('vendor/geo.reverseresolve').get(_e.coords.latitude + ',' + _e.coords.longitude, function(_res) {
-				self.location.setText(_res);
-			});
-			self.mapview.setRegion({
-				latitude : _e.coords.latitude,
-				longitude : _e.coords.longitude,
-				latitudeDelta : 0.01,
-				longitudeDelta : 0.01
-			});
-		}
-		self.pin = Ti.Map.createAnnotation({
-			latitude : _e.coords.latitude,
-			longitude : _e.coords.longitude,
-			draggable : true
-		});
-		self.mapview.addEventListener('pinchangedragstate', function(_e) {
-			require('vendor/geo.reverseresolve').get(_e.annotation.latitude + ',' + _e.annotation.longitude, function(_res) {
-				self.location.setText(_res);
-			});
+	self.container.add(self.input);
 
-		});
-		self.mapview.addAnnotation(self.pin);
+	self.container.add(self.mapview);
+
+	self.input.addEventListener('return', function() {
+		message.text = self.input.getValue();
+		self.input.blur();
 	});
-	self.add(self.mapview);
-	self.add(self.location);
 	self.addEventListener('open', function() {
 		var activity = self.getActivity();
 		if (activity && activity.actionBar) {
@@ -92,13 +98,47 @@ exports.create = function() {
 					}).addEventListener("click", function() {
 						require('ui/admin.dialog').create(function(_res) {
 							if (_res == true) {
-
+								Ti.App.CloudPush.push2channel('alert', {
+									alert : message.address,
+									latlng : message.latlng,
+									title : 'Neuer Treffpunkt',
+									badget : '+1',
+									sound : 'klingel',
+									icon : 'ic_pn_newuser',
+									vibrate : true
+							}, function(_e) {
+							if (_e.success) {
+										self.close();
+									}
+								});
 							}
 						});
 					});
 				}
 			};
 		}
+	});
+	Ti.Geolocation.getCurrentPosition(function(_e) {
+		if (_e.success) {
+			console.log(_e.coords);
+			getAddress(_e.coords.latitude, _e.coords.longitude);
+			self.mapview.setRegion({
+				latitude : _e.coords.latitude,
+				longitude : _e.coords.longitude,
+				latitudeDelta : 0.01,
+				longitudeDelta : 0.01
+			});
+
+			self.pin = Ti.Map.createAnnotation({
+				latitude : _e.coords.latitude,
+				longitude : _e.coords.longitude,
+				draggable : true
+			});
+		}
+		self.mapview.addEventListener('pinchangedragstate', function(_e) {
+			getAddress(_e.annotation.latitude, _e.annotation.longitude);
+		});
+		self.mapview.addAnnotation(self.pin);
 	});
 	return self;
 };
