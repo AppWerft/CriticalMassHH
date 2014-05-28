@@ -10,6 +10,10 @@ exports.create = function() {
 		window : require('ui/map.window').create()
 	}), Ti.UI.createTab({
 		icon : Ti.Android ? null : '/assets/map.png',
+		title : 'Chat',
+		window : require('ui/chat.window').create()
+	}), Ti.UI.createTab({
+		icon : Ti.Android ? null : '/assets/map.png',
 		title : 'Videos',
 		window : require('ui/videos.window').create()
 	}), Ti.UI.createTab({
@@ -27,6 +31,14 @@ exports.create = function() {
 	self.addEventListener("open", function() {
 		require('ui/tabgroup.menue').get(self);
 	});
+	self.addEventListener("androidback", function() {
+		Ti.App.CloudPush.unsubscribeChannel('chat', function(_e) {
+			Ti.Android && Ti.UI.createNotification({
+				message : 'Abmeldung vom Chat erfolgreich.'
+			}).show();
+			self.close();
+			return true;
+		});
+	});
 	return self;
 };
-

@@ -4,7 +4,7 @@ exports.create = function() {
 		subtitle : 'Bestimmerbereich'
 	});
 	Ti.Map = require('ti.map');
-	function getAddress(_latitude,_longitude) {
+	function getAddress(_latitude, _longitude) {
 		require('vendor/geo.reverseresolve').get(_latitude + ',' + _longitude, function(_res) {
 			self.location.text = _res;
 			message.address = _res;
@@ -45,7 +45,7 @@ exports.create = function() {
 		right : 10,
 		height : Ti.UI.SIZE,
 		bottom : 10,
-		text : 'Hier kannst Du den Startpunkt der Fahrt festlegen. Ziehe einfach den Pin zum Treffpunkt'
+		text : 'Hier können die Bestimmer den Startpunkt der Fahrt festlegen. Ziehe einfach den Pin zum Treffpunkt oder sag mir die Adresse.\nZum eigentlichen Versenden brauchst Du ein Passwort.'
 	}));
 	self.mapview = Ti.Map.createView({
 		mapType : Ti.Map.NORMAL_TYPE,
@@ -91,6 +91,32 @@ exports.create = function() {
 		if (activity && activity.actionBar) {
 			activity.onCreateOptionsMenu = function(e) {
 				if (Ti.Android && Ti.Platform.Android.API_LEVEL > 12 && Ti.Network.online == true) {
+
+					e.menu.add({
+						icon : Ti.App.Android.R.drawable.ic_action_mic,
+						showAsAction : Ti.Android.SHOW_AS_ACTION_IF_ROOM,
+						itemId : 1
+					}).addEventListener("click", function() {
+						require('controls/speechrecognizer').create(null, function(_res) {
+							require('vendor/geo.resolve').get({
+								city : _res
+							}, function(_geo) {
+								console.log(_geo);
+								if (!_geo.res.lat)
+									return;
+								var region = self.mapview.getRegion();
+								region.latitude = _geo.res.lat;
+								region.longitude = _geo.res.lng;
+								region.animated = true;
+								self.mapview.setLocation(region);
+								console.log('region OK');
+								if (self.pin && self.mapview) {
+									self.pin.setLatitude(_geo.res.lat);
+									self.pin.setLongitude(_geo.res.lng);
+								}
+							});
+						});
+					});
 					e.menu.add({
 						icon : Ti.App.Android.R.drawable.ic_action_megafon,
 						showAsAction : Ti.Android.SHOW_AS_ACTION_IF_ROOM,
@@ -101,13 +127,14 @@ exports.create = function() {
 								Ti.App.CloudPush.push2channel('alert', {
 									alert : message.address,
 									latlng : message.latlng,
+									message : message.text,
 									title : 'Neuer Treffpunkt',
 									badget : '+1',
 									sound : 'klingel',
 									icon : 'ic_pn_newuser',
 									vibrate : true
-							}, function(_e) {
-							if (_e.success) {
+								}, function(_e) {
+									if (_e.success) {
 										self.close();
 									}
 								});

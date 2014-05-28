@@ -9,10 +9,13 @@ exports.create = function(_needle, _callbacks) {
 		speechrecognizer.stop();
 		if (e.results && e.results.split(',')[0]) {
 			var answer = e.results.split(',')[0];
-			if (answer.toLowerCase() == _needle)
-				_callbacks.onOk();
-			else
-				_callbacks.onError();
+			if (_needle != null) {
+				if (answer.toLowerCase() == _needle)
+					_callbacks.onOk();
+				else
+					_callbacks.onError();
+			} else
+				_callbacks(e.results.split(',')[0]);
 		}
 	});
 };

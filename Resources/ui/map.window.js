@@ -2,6 +2,8 @@ Ti.Map = require('ti.map');
 
 exports.create = function() {
 	var options = arguments[0] || {};
+	var meetingpoint = null;
+
 	var ready = false;
 	var annotations = [];
 	var self = require('vendor/window').create({
@@ -34,6 +36,32 @@ exports.create = function() {
 		userLocation : false
 	};
 	self.mapview = Ti.App.SmartMap.getView(mapoptions);
+	self.updatemeetingpointannotation = function(_payload) {
+		if (meetingpoint != null) {
+			self.mapview.removeAnnotation(meetingpoint);
+			meetingpoint = null;
+		}
+		console.log('info: creation of annotation');
+		meetingpoint = Ti.Map.createAnnotation({
+			latitude : _payload.latlng.split(',')[0],
+			longitude : _payload.latlng.split(',')[1],
+			title : _payload.android.alert,
+			subtitle : _payload.message
+		});
+		if (self.mapview) {
+			self.mapview.addAnnotation(meetingpoint);
+			self.mapview.selectAnnotation(meetingpoint);
+			self.mapview.setRegion({
+				latitude : _payload.latlng.split(',')[0],
+				longitude : _payload.latlng.split(',')[1],
+				latitudeDelta : 0.1,
+				longitudeDelta : 0.1
+			});
+		} else {
+			console.log('Error: no mapview');
+		}
+	};
+
 	self.mapview.addEventListener('changed', function(_e) {
 		radlertext.setText(_e.text);
 	});
@@ -45,16 +73,23 @@ exports.create = function() {
 	});
 	if (Ti.App.Properties.hasProperty('USER') && Ti.App.Properties.hasProperty('POSITION')) {
 		var payload = Ti.App.Properties.getObject('POSITION');
-		var pin = Ti.Map.createAnnotation({
-			latitude : payload.latlng.split(',')[0],
-			longitude : payload.latlng.split(',')[1],
-			title : payload.title,
-			subtitle : payload.alert
-		});
-		self.mapview.addAnnotation(pin);
-		self.mapview.selectAnnotation(pin);
+		self.updatemeetingpointannotation(payload);
 	}
-	
+	var eventlistener = false;
+	Ti.App.addEventListener('newposition', function(_e) {
+		if (eventlistener == true) {
+			return;
+		}
+		eventlistener = true;
+		console.log('##################');
+		var dialog = Ti.UI.createAlertDialog({
+			buttonNames : ['OK'],
+			message : 'Treffpunkt:\n' + _e.android.alert + '\n\nInfo:\n' + _e.message + '\n\n' + _e.latlng,
+			title : 'Neuer CM-Treff'
+		});
+		dialog.show();
+		self.updatemeetingpointannotation(_e);
+	});
 	var micro = Ti.UI.createImageView({
 		width : Ti.UI.FILL,
 		height : 'auto',

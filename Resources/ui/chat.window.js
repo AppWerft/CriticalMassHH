@@ -25,16 +25,22 @@ exports.create = function() {
 		enableReturnKey : true
 	});
 	input.addEventListener('return', function(_e) {
-		Chat.write(_e.value);
+		if (Ti.App.Properties.hasProperty('USER')) {
+			Chat.write(_e.value);
+		} else
+			Ti.UI.createNotification({
+				message : 'Du musst die Parole kennenund einsprechen, um hier chatten zu können.'
+			}).show();
+		;
 		input.setValue('');
 		input.blur();
-		
+
 	});
 	self.add(input);
 	Chat.register({
 		registered : function() {
 			ai.hide();
-			
+
 			input.focus();
 		},
 		received : function(_payload) {
@@ -44,7 +50,7 @@ exports.create = function() {
 				left : 10,
 				top : 5,
 				bottom : 5,
-				opacity: (_payload.ich)? 0.6 :1,
+				opacity : (_payload.ich) ? 0.6 : 1,
 				textAlign : 'left',
 				width : Ti.UI.FILL,
 				right : 5,
@@ -59,11 +65,6 @@ exports.create = function() {
 		}
 	});
 	var style;
-	if (Ti.Platform.name === 'iPhone OS') {
-		style = Ti.UI.iPhone.ActivityIndicatorStyle.BIG;
-	} else {
-		style = Ti.UI.ActivityIndicatorStyle.BIG;
-	}
 	var ai = Ti.UI.createActivityIndicator({
 		color : '#00FF12',
 		font : {
@@ -71,7 +72,6 @@ exports.create = function() {
 			fontSize : 16,
 		},
 		message : 'Anmeldung beim CriticalMass-Chat …',
-		style : style,
 		height : Ti.UI.SIZE,
 		width : Ti.UI.SIZE
 	});

@@ -7,6 +7,7 @@ var CP = function(_callback) {
 		CloudPush.showTrayNotificationsWhenFocused = true;
 		CloudPush.focusAppOnPush = false;
 		CloudPush.showTrayNotification = true;
+		CloudPush.singleCallback = true;
 		CloudPush.retrieveDeviceToken({
 			success : function(e) {
 				console.log('Info: deviceToken saved');
@@ -54,7 +55,6 @@ CP.prototype = {
 };
 
 CloudPush.addEventListener('callback', function(_payload) {
-	console.log(_payload);
 	var payload = JSON.parse(_payload.payload);
 	if (payload.latlng) {
 		console.log(JSON.stringify(payload));
@@ -66,14 +66,7 @@ CloudPush.addEventListener('trayClickLaunchedApp', function(_payload) {
 	Ti.API.info('Tray Click Launched App (app was not running)');
 });
 CloudPush.addEventListener('trayClickFocusedApp', function(_payload) {
-	console.log(_payload.payload);
-	var payload = JSON.parse(_payload.payload);
-	if (JSON.parse(payload).latlng) {
-		var dialog = Ti.UI.createAlertDialog({
-			message : "Neuer Treffpunkt: " + payload.address + '\n' + payload.text,
-			title : 'Neue Position'
-		}).show();
-	}
+	
 	Ti.API.info('Tray Click Focused App (app was already running)');
 });
 
@@ -118,3 +111,14 @@ exports.sendPosition = function(_message, callback) {
 };
 
 module.exports = CP;
+var ex = {
+	"badget" : "+1",
+	"android" : {
+		"icon" : "ic_pn_newuser",
+		"title" : "Neuer Treffpunkt",
+		"sound" : "klingel",
+		"alert" : "Hamburg Rothenbaumchaussee 17",
+		"vibrate" : true
+	},
+	"latlng" : "53.565458,9.9887776"
+}; 

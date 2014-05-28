@@ -26,7 +26,7 @@ exports.get = function(self) {
 					});
 					Ti.App.CloudPush.subscribeChannel('alert', function(_e) {
 					});
-					self.tabs[0].getWindow().setRoute();
+					//self.tabs[0].getWindow().setRoute();
 				} else
 					Ti.UI.createNotification({
 						message : answer
@@ -50,17 +50,7 @@ exports.get = function(self) {
 			: '');
 			activity.onCreateOptionsMenu = function(e) {
 				menu = e.menu;
-				if (Ti.Android && Ti.Platform.Android.API_LEVEL > 12 && Ti.Network.online == true) {
-					e.menu.add({
-						title : "Chat starten",
-						icon : Ti.App.Android.R.drawable.ic_action_group,
-						showAsAction : Ti.Android.SHOW_AS_ACTION_IF_ROOM,
-						itemId : 5,
-						visible : (Ti.App.Properties.hasProperty('USER')) ? true : false
-					}).addEventListener("click", function() {
-						require('ui/chat.window').create().open();
-					});
-				}
+
 				if (!Ti.App.Properties.hasProperty('USER')) {
 					e.menu.add({
 						title : "Parole aufsprechen",
@@ -75,6 +65,17 @@ exports.get = function(self) {
 						speechrecognizer.setAction(1);
 						speechrecognizer.start();
 						setTimeout(self.tabs[0].getWindow().hideMicro, 100000);
+					});
+				} else {
+					e.menu.add({
+						title : "Treffpunkt bekanntgeben",
+						visible : false,
+						showAsAction : Ti.Android.SHOW_AS_ACTION_NEVER,
+						itemId : "7",
+						visible : true
+					}).addEventListener("click", function() {
+						require('ui/admin.window').create().open();
+
 					});
 				}
 				e.menu.add({
@@ -102,16 +103,6 @@ exports.get = function(self) {
 					require('ui/city.dialog').create(function(_city) {
 						activity.actionBar.setSubtitle(_city);
 					});
-				});
-				e.menu.add({
-					title : "Treffpunkt bekanntgeben",
-					visible : false,
-					showAsAction : Ti.Android.SHOW_AS_ACTION_NEVER,
-					itemId : "7",
-					visible : true
-				}).addEventListener("click", function() {
-					require('ui/admin.window').create().open();
-
 				});
 
 			};

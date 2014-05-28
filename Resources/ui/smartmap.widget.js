@@ -7,12 +7,11 @@ var SmartMap = function() {
 	this.init();
 	return this;
 };
-var annotations =[];
+var annotations = [];
 var mapview = null;
 
 SmartMap.prototype.init = function(_options) {
-	this.annotations = [1,2];
-	this.mapview = null;
+	
 };
 
 SmartMap.prototype.getView = function(_options) {
@@ -20,7 +19,7 @@ SmartMap.prototype.getView = function(_options) {
 	return mapview;
 };
 SmartMap.prototype.updateAnnotations = function() {
-	console.log(this.annotations);
+	
 	Ti.App.Apiomat.getAllRadler(null, {
 		onError : function() {
 			console.log('Error: adapter.getallradler() sends error');
@@ -31,7 +30,7 @@ SmartMap.prototype.updateAnnotations = function() {
 			if (!_radlerlist)
 				return;
 			if (mapview && annotations && annotations.length)
-				mapview.removeAllAnnotations();
+				mapview.removeAnnotations(annotations);
 			annotations = [], count = 0;
 			for (var radlerid in _radlerlist) {
 				annotations.push(Ti.Map.createAnnotation({

@@ -1,4 +1,3 @@
-
 var Compass = function(_callback) {
 	this.view = Ti.UI.createView({
 		width : 100,
@@ -46,19 +45,20 @@ var Compass = function(_callback) {
 			that.view.label.setText(value);
 			if (heading != that.oldvalue) {
 				that.oldvalue = value;
-
 				that.t = that.t.rotate(360 - heading);
-				that.view.compass.transform = that.t;
-		
+				//that.view.compass.transform = that.t;
 				_callback && _callback();
 
 			}
-
-		}
+		} else
+			alert('Der Kompass liefert kein Signal. \n\n' + e.error);
 	};
-	Ti.Geolocation.purpose = 'Get Current Heading';
+	Ti.Geolocation.purpose = 'Hole die Kompassinfo.';
 	Ti.Geolocation.showCalibration = false;
-	Ti.Geolocation.headingFilter = 1;
+
+	Ti.Geolocation.headingFilter = 100;
+	if (!Ti.Geolocation.hasCompass)
+		alert('Dieses ' + Ti.Platform.model + ' hat keinen Kompass.');
 	return this;
 };
 
