@@ -9,8 +9,10 @@ exports.get = function(self) {
 				var answer = e.results.split(',')[0];
 				if (answer.toLowerCase() == Ti.App.Properties.getString('parole')) {
 					menu.findItem("0").setVisible(false);
-					menu.findItem("5").setVisible(true);
 					menu.findItem("7").setVisible(true);
+					Ti.Media.createSound({
+						url : '/assets/unlock.mp3'
+					}).play();
 					Ti.UI.createNotification({
 						message : 'OK, habe ich verstanden – nun versuche ich Dich beim Nachrichtendienst anzumelden.'
 					}).show();
@@ -26,6 +28,7 @@ exports.get = function(self) {
 					});
 					Ti.App.CloudPush.subscribeChannel('alert', function(_e) {
 					});
+
 					//self.tabs[0].getWindow().setRoute();
 				} else
 					Ti.UI.createNotification({
@@ -34,29 +37,32 @@ exports.get = function(self) {
 			}
 			speechrecognizer.stop();
 		});
-		if (Ti.App.Properties.hasProperty('CITY')) {
-			Ti.Android && Ti.UI.createNotification({
-				message : Ti.App.Properties.getString('CITY')
-			}).show();
-		} else
-			require('ui/city.dialog').create(function(_city) {
-				activity.actionBar.setSubtitle(_city);
+		Ti.App.addEventListener('startrecording',function(){
+			menu.findItem("1").setChecked(true);
+		});
+		if (!Ti.App.Properties.hasProperty('CITY')) {
+			require('ui/city.dialog').create(/*callback */
+			function(_city) {
+				if (_city) {
+					Ti.App.CloudPush.subscribeChannel('chat', function(_e) {
+					});
+					activity.actionBar.setSubtitle(_city);
+				}
 			});
-		var activity = self.getActivity();
-		if (activity && activity.actionBar) {
-			activity.actionBar.setTitle('CriticalMass');
-			activity.actionBar.setSubtitle(Ti.App.Properties.hasProperty('CITY')//
-			? Ti.App.Properties.getString('CITY')//
-			: '');
-			activity.onCreateOptionsMenu = function(e) {
-				menu = e.menu;
-
-				if (!Ti.App.Properties.hasProperty('USER')) {
+			var activity = self.getActivity();
+			if (activity && activity.actionBar) {
+				activity.actionBar.setTitle('CriticalMass');
+				activity.actionBar.setSubtitle(Ti.App.Properties.hasProperty('CITY')//
+				? Ti.App.Properties.getString('CITY')//
+				: '');
+				activity.onCreateOptionsMenu = function(e) {
+					menu = e.menu;
 					e.menu.add({
 						title : "Parole aufsprechen",
-						showAsAction : Ti.Android.SHOW_AS_ACTION_NEVER,
 						itemId : 0,
-						visible : true
+						icon : Ti.App.Android.R.drawable.ic_action_mic,
+						showAsAction : Ti.Android.SHOW_AS_ACTION_IF_ROOM,
+						visible : Ti.App.Properties.hasProperty('USER') ? false : true
 					}).addEventListener("click", function() {
 						Ti.UI.createNotification({
 							message : 'Jetzt die vereinbarte Parole einsprechen.'
@@ -66,46 +72,45 @@ exports.get = function(self) {
 						speechrecognizer.start();
 						setTimeout(self.tabs[0].getWindow().hideMicro, 100000);
 					});
-				} else {
+
+					e.menu.add({
+						title : "Standort senden",
+						showAsAction : Ti.Android.SHOW_AS_ACTION_NEVER,
+						itemId : 1,
+						checked : (Ti.App.Properties.hasProperty('RECORD')) ? true : false,
+						checkable : true,
+						visible : true
+					}).addEventListener("click", function() {
+						if ((Ti.App.Properties.hasProperty('RECORD'))) {
+							e.menu.getItem(1).checked = false;
+							Ti.App.Properties.removeProperty('RECORD');
+						} else {
+							Ti.App.Properties.setString('RECORD', 'active');
+							e.menu.getItem(1).checked = true;
+						}
+					});
+					e.menu.add({
+						title : "Stadt wechseln",
+						showAsAction : Ti.Android.SHOW_AS_ACTION_NEVER,
+						itemId : 3,
+						visible : true
+					}).addEventListener("click", function() {
+						require('ui/city.dialog').create(function(_city) {
+							activity.actionBar.setSubtitle(_city);
+						});
+					});
 					e.menu.add({
 						title : "Treffpunkt bekanntgeben",
 						visible : false,
 						showAsAction : Ti.Android.SHOW_AS_ACTION_NEVER,
 						itemId : "7",
-						visible : true
+						visible : Ti.App.Properties.hasProperty('USER') ? true : false
 					}).addEventListener("click", function() {
 						require('ui/admin.window').create().open();
 
 					});
-				}
-				e.menu.add({
-					title : "Standort senden",
-					showAsAction : Ti.Android.SHOW_AS_ACTION_NEVER,
-					itemId : 1,
-					checked : (Ti.App.Properties.hasProperty('RECORD')) ? true : false,
-					checkable : true,
-					visible : true
-				}).addEventListener("click", function() {
-					if ((Ti.App.Properties.hasProperty('RECORD'))) {
-						e.menu.getItem(1).checked = false;
-						Ti.App.Properties.removeProperty('RECORD');
-					} else {
-						Ti.App.Properties.setString('RECORD', 'active');
-						e.menu.getItem(1).checked = true;
-					}
-				});
-				e.menu.add({
-					title : "Stadt wechseln",
-					showAsAction : Ti.Android.SHOW_AS_ACTION_NEVER,
-					itemId : 3,
-					visible : true
-				}).addEventListener("click", function() {
-					require('ui/city.dialog').create(function(_city) {
-						activity.actionBar.setSubtitle(_city);
-					});
-				});
-
-			};
+				};
+			}
 		}
 	}
 };

@@ -33,7 +33,7 @@ exports.create = function(_callback) {
 				for (var j = 0; j < 3; j++) {
 					sum += ('.' + Gears[j].getValue());
 				}
-				if (sum == '.12.20.49') {
+				if (sum == '.12.20.7') {
 					player.release();
 					player.url = '/assets/unlock.mp3';
 					player.play();

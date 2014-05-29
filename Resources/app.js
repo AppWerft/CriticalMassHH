@@ -23,6 +23,7 @@
 	var tabgroup = require('ui/tabgroup').create();
 	tabgroup.open();
 	require('controls/georecord.dialog').create();
+	/* starting of backgroudn geo recording : */
 	var alarmModule = require('bencoding.alarmmanager');
 	var alarmManager = alarmModule.createAlarmManager();
 	alarmManager.addAlarmService({
@@ -35,5 +36,4 @@
 	});
 	require('vendor/versionsreminder').start();
 	require('vendor/playservice').start();
-
 }();

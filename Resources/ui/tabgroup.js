@@ -8,11 +8,11 @@ exports.create = function() {
 		icon : Ti.Android ? null : '/assets/map.png',
 		title : 'Karte',
 		window : require('ui/map.window').create()
-	}), Ti.UI.createTab({
+	}), /*Ti.UI.createTab({
 		icon : Ti.Android ? null : '/assets/map.png',
 		title : 'Chat',
 		window : require('ui/chat.window').create()
-	}), Ti.UI.createTab({
+	}), */Ti.UI.createTab({
 		icon : Ti.Android ? null : '/assets/map.png',
 		title : 'Videos',
 		window : require('ui/videos.window').create()
@@ -34,11 +34,13 @@ exports.create = function() {
 	self.addEventListener("androidback", function() {
 		Ti.App.CloudPush.unsubscribeChannel('chat', function(_e) {
 			Ti.Android && Ti.UI.createNotification({
-				message : 'Abmeldung vom Chat erfolgreich.'
+				message : 'Abmeldung vom Chat „' + Ti.App.Properties.getString('CITY', '') + '“ erfolgreich.'
 			}).show();
-			self.close();
-			return true;
+			setTimeout(function() {
+				self.close();
+			}, 1000);
 		});
+		return false;
 	});
 	return self;
 };

@@ -104,6 +104,7 @@ exports.create = function() {
 								console.log(_geo);
 								if (!_geo.res.lat)
 									return;
+								getAddress(_geo.res.lat,_geo.res.lng);
 								var region = self.mapview.getRegion();
 								region.latitude = _geo.res.lat;
 								region.longitude = _geo.res.lng;

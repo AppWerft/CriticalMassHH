@@ -58,7 +58,7 @@ exports.init = function() {
 							});
 
 						} else {
-							console.log('Error: subsribing of channel failed');
+							console.log('Error: subscribing of channel failed');
 						}
 					});
 

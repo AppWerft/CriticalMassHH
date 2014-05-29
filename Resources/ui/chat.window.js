@@ -29,7 +29,7 @@ exports.create = function() {
 			Chat.write(_e.value);
 		} else
 			Ti.UI.createNotification({
-				message : 'Du musst die Parole kennenund einsprechen, um hier chatten zu können.'
+				message : 'Du musst die Parole kennen und einsprechen, um hier chatten zu können.'
 			}).show();
 		;
 		input.setValue('');
@@ -39,9 +39,6 @@ exports.create = function() {
 	self.add(input);
 	Chat.register({
 		registered : function() {
-			ai.hide();
-
-			input.focus();
 		},
 		received : function(_payload) {
 			var row = Ti.UI.createTableViewRow();
@@ -65,17 +62,6 @@ exports.create = function() {
 		}
 	});
 	var style;
-	var ai = Ti.UI.createActivityIndicator({
-		color : '#00FF12',
-		font : {
-			fontFamily : 'LW',
-			fontSize : 16,
-		},
-		message : 'Anmeldung beim CriticalMass-Chat …',
-		height : Ti.UI.SIZE,
-		width : Ti.UI.SIZE
-	});
-	self.add(ai);
-	ai.show();
+	
 	return self;
 };

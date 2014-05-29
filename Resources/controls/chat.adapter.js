@@ -1,4 +1,4 @@
-const CHAT = "chat";
+/*const CHAT = Ti.App.Properties.getString('CITY','')+"chat";
 var Chat = function() {
 	return this;
 };
@@ -23,7 +23,7 @@ Chat.prototype = {
 						}).show();
 						_callbacks.registered();
 					} else {
-						alert('Error: subsribing of channel failed');
+						alert('Error: subscribing of channel failed');
 					}
 				});
 			}
@@ -73,4 +73,4 @@ Chat.prototype = {
 	}
 };
 module.exports = Chat;
-
+*/

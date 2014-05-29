@@ -41,11 +41,12 @@ var Compass = function(_callback) {
 		if (!e.error && e.heading) {
 			var accuracy = e.heading.accuracy;
 			var heading = e.heading.trueHeading ? e.heading.trueHeading : e.heading.magneticHeading;
-			var value = Math.round(heading / 7.2);
+			var value = Math.round(heading / 10);
 			that.view.label.setText(value);
 			if (heading != that.oldvalue) {
 				that.oldvalue = value;
-				that.t = that.t.rotate(360 - heading);
+				//Ti.Media.vibrate([0,50]);
+				//that.t = that.t.rotate(360 - heading);
 				//that.view.compass.transform = that.t;
 				_callback && _callback();
 

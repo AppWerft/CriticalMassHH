@@ -81,7 +81,6 @@ exports.create = function() {
 			return;
 		}
 		eventlistener = true;
-		console.log('##################');
 		var dialog = Ti.UI.createAlertDialog({
 			buttonNames : ['OK'],
 			message : 'Treffpunkt:\n' + _e.android.alert + '\n\nInfo:\n' + _e.message + '\n\n' + _e.latlng,
