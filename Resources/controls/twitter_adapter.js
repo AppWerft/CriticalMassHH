@@ -69,8 +69,8 @@ TwitterAdapter.prototype.clearAccessToken = function() {
 
 // send a tweet (only if accesstoken is present)
 TwitterAdapter.prototype.addTweet = function(_args) {
-	if (!_args.tweet.match(/#ergobaby/i))
-		_args.tweet += ('#E' +Ti.App.Properties.getString('twitter.handle'));
+	if (!_args.tweet.match(/#cm_hh/i))
+		_args.tweet += ('#' +Ti.App.Properties.getString('twitter.handle'));
 	this.cb.__call("statuses_update", {
 		"status" : _args.tweet
 	}, function(reply) {

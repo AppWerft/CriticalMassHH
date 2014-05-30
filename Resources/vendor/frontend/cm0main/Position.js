@@ -125,5 +125,14 @@ Apiomat.Position.prototype.setPositionLongitude = function(_longitude)
 Apiomat.Position.prototype.setDevice = function(_device) {
     this.data.device = _device;
 };
+
+        Apiomat.Position.prototype.getCity = function() 
+{
+    return this.data.city;
+};
+
+Apiomat.Position.prototype.setCity = function(_city) {
+    this.data.city = _city;
+};
 })(typeof exports === 'undefined' ? Apiomat
         : exports);

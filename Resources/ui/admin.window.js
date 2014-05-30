@@ -15,7 +15,7 @@ exports.create = function() {
 	var message = {
 		latlng : '',
 		address : '',
-		text : ''
+		message : ''
 	};
 	self.container = Ti.UI.createView({
 		backgroundColor : 'black',
@@ -82,8 +82,8 @@ exports.create = function() {
 
 	self.container.add(self.mapview);
 
-	self.input.addEventListener('return', function() {
-		message.text = self.input.getValue();
+	self.input.addEventListener('return', function(_e) {
+		message.message = _e.value;
 		self.input.blur();
 	});
 	self.addEventListener('open', function() {
@@ -128,7 +128,7 @@ exports.create = function() {
 								Ti.App.CloudPush.push2channel('alert', {
 									alert : message.address,
 									latlng : message.latlng,
-									message : message.text,
+									message : message.message,
 									title : 'Neuer Treffpunkt',
 									badget : '+1',
 									sound : 'klingel',

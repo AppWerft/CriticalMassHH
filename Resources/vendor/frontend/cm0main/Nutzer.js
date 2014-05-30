@@ -145,5 +145,23 @@ Apiomat.Nutzer.prototype.getModuleName = function() {
 };
 
 /* easy getter and setter */
+
+        Apiomat.Nutzer.prototype.getPhoto = function() 
+{
+    return this.data.photo;
+};
+
+Apiomat.Nutzer.prototype.setPhoto = function(_photo) {
+    this.data.photo = _photo;
+};
+
+        Apiomat.Nutzer.prototype.getCity = function() 
+{
+    return this.data.city;
+};
+
+Apiomat.Nutzer.prototype.setCity = function(_city) {
+    this.data.city = _city;
+};
 })(typeof exports === 'undefined' ? Apiomat
         : exports);

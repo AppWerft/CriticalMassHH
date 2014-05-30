@@ -46,6 +46,7 @@ exports.create = function() {
 			latitude : _payload.latlng.split(',')[0],
 			longitude : _payload.latlng.split(',')[1],
 			title : _payload.android.alert,
+			image : '/assets/' + Ti.Platform.displayCaps.density + 'pin.png',
 			subtitle : _payload.message
 		});
 		if (self.mapview) {

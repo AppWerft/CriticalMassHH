@@ -146,6 +146,43 @@ Apiomat.User.prototype.getModuleName = function() {
 
 /* easy getter and setter */
 
+
+        Apiomat.User.prototype.getSex = function() 
+{
+    return this.data.dynamicAttributes["sex"];
+};
+
+Apiomat.User.prototype.setSex = function(_sex) {
+    this.data.dynamicAttributes["sex"] = _sex;
+};
+
+        Apiomat.User.prototype.getAge = function() 
+{
+    return this.data.dynamicAttributes["age"];
+};
+
+Apiomat.User.prototype.setAge = function(_age) {
+    this.data.dynamicAttributes["age"] = _age;
+};
+
+        Apiomat.User.prototype.getDeviceToken = function() 
+{
+    return this.data.dynamicAttributes["deviceToken"];
+};
+
+Apiomat.User.prototype.setDeviceToken = function(_deviceToken) {
+    this.data.dynamicAttributes["deviceToken"] = _deviceToken;
+};
+
+        Apiomat.User.prototype.getCompany = function() 
+{
+    return this.data.dynamicAttributes["company"];
+};
+
+Apiomat.User.prototype.setCompany = function(_company) {
+    this.data.dynamicAttributes["company"] = _company;
+};
+
         Apiomat.User.prototype.getPassword = function() 
 {
     return this.data.password;
@@ -153,6 +190,15 @@ Apiomat.User.prototype.getModuleName = function() {
 
 Apiomat.User.prototype.setPassword = function(_password) {
     this.data.password = _password;
+};
+
+        Apiomat.User.prototype.getProfession = function() 
+{
+    return this.data.dynamicAttributes["profession"];
+};
+
+Apiomat.User.prototype.setProfession = function(_profession) {
+    this.data.dynamicAttributes["profession"] = _profession;
 };
 
         Apiomat.User.prototype.getLastName = function() 
@@ -163,7 +209,6 @@ Apiomat.User.prototype.setPassword = function(_password) {
 Apiomat.User.prototype.setLastName = function(_lastName) {
     this.data.lastName = _lastName;
 };
-
 
         Apiomat.User.prototype.getFirstName = function() 
 {
@@ -200,6 +245,142 @@ Apiomat.User.prototype.setUserName = function(_userName) {
 
 Apiomat.User.prototype.setRegistrationId = function(_registrationId) {
     this.data.dynamicAttributes["registrationId"] = _registrationId;
+};
+
+    /**
+ * Returns an URL of the image. <br/> You can provide several optional parameters to
+ * manipulate the image:
+ * 
+ * @param width (optional)
+ *            the width of the image, 0 to use the original size. If only width
+ *            or height are provided, the other value is computed.
+ * @param height (optional)
+ *            the height of the image, 0 to use the original size. If only width
+ *            or height are provided, the other value is computed.
+ * @param backgroundColorAsHex (optional)
+ *            the background color of the image, null or empty uses the original
+ *            background color. Caution: Don't send the '#' symbol! Example:
+ *            <i>ff0000</i>
+ * @param alpha (optional)
+ *            the alpha value of the image (between 0 and 1), null to take the original value.
+ * @param format (optional)
+ *            the file format of the image to return, e.g. <i>jpg</i> or <i>png</i>
+  * @return the URL of the image
+ */
+Apiomat.User.prototype.getImageURL = function(width, height, bgColorAsHex, alpha, format) 
+{
+    var url = this.data.dynamicAttributes["imageURL"];
+    if(!url)
+    {
+        return undefined;
+    }
+    url += ".img?apiKey=" + Apiomat.User.AOMAPIKEY + "&system=" + Apiomat.User.AOMSYS;
+    if (width) {
+        url += "&width=" + width;
+    }
+    if (height) {
+        url += "&height=" + height;
+    }
+    if (bgColorAsHex) {
+        url += "&bgcolor=" + bgColorAsHex;
+    }
+    if (alpha) {
+        url += "&alpha=" + alpha;
+    }
+    if (format) {
+        url += "&format=" + format;
+    }
+    return url;
+}
+
+Apiomat.User.prototype.loadImage = function(width, height, bgColorAsHex, alpha, format,_callback)
+{
+    var resUrl = this.getImageURL(width, height, bgColorAsHex, alpha, format);
+    return Apiomat.Datastore.getInstance().loadResource(resUrl, _callback);
+}
+
+Apiomat.User.prototype.postImage = function(_data, _callback) 
+{
+    var postCB = {
+            onOk : function(_imgHref) {
+                if (_imgHref) {
+                    this.parent.data.dynamicAttributes["imageURL"] = _imgHref;
+                    /* update object again */
+                    this.parent.save({
+                        onOk : function() {
+                            if (_callback && _callback.onOk) {
+                                _callback.onOk();
+                            }           
+                        },
+                        onError : function(error) {
+                            if (_callback && _callback.onError) {
+                                _callback.onError(error);
+                            }
+                        }
+                    });
+                }
+                else {
+                    var error = new Apiomat.ApiomatRequestError(Apiomat.Status.HREF_NOT_FOUND);
+                    if (_callback && _callback.onError) {
+                        _callback.onError(error);
+                    } else if(console && console.log) {
+                        console.log("Error occured: " + error);
+                    }
+                }
+            },
+            onError : function(error) {
+                if (_callback && _callback.onError) {
+                    _callback.onError(error);
+                }
+            }
+    };
+    postCB.parent = this;
+    if(Apiomat.Datastore.getInstance().shouldSendOffline("POST"))
+    {
+        Apiomat.Datastore.getInstance( ).sendOffline( "POST", null, _data, true, postCB );
+    }
+    else
+    {
+        Apiomat.Datastore.getInstance().postStaticDataOnServer(_data, true, postCB);
+    }
+};
+
+Apiomat.User.prototype.deleteImage = function(_callback) 
+{
+    var imageHref = this.data.dynamicAttributes["imageURL"];
+
+    var deleteCB = {
+        onOk : function() {
+            delete this.parent.data.dynamicAttributes["imageURL"];
+            /* update object again and save deleted image reference in object */
+            this.parent.save({
+                onOk : function() {
+                    if (_callback && _callback.onOk) {
+                        _callback.onOk();
+                    }           
+                },
+                onError : function(error) {
+                    if (_callback && _callback.onError) {
+                        _callback.onError(error);
+                    }
+                }
+            });
+        },
+        onError : function(error) {
+            if (_callback && _callback.onError) {
+                _callback.onError(error);
+            }
+        }
+    };
+    deleteCB.parent = this;
+    if(Apiomat.Datastore.getInstance().shouldSendOffline("DELETE"))
+    {
+        Apiomat.Datastore.getInstance( ).sendOffline( "DELETE", imageHref, null, null, deleteCB );
+    }
+    else
+    {
+        Apiomat.Datastore.getInstance().deleteOnServer(imageHref, deleteCB);
+    }
 };
 
    Apiomat.User.prototype.getLocLatitude = function() 
@@ -246,15 +427,6 @@ Apiomat.User.prototype.setLocLongitude = function(_longitude)
         locArr[1] = _longitude;
     }
     this.data.loc = locArr;
-};
-
-        Apiomat.User.prototype.getDeviceToken = function() 
-{
-    return this.data.dynamicAttributes["deviceToken"];
-};
-
-Apiomat.User.prototype.setDeviceToken = function(_deviceToken) {
-    this.data.dynamicAttributes["deviceToken"] = _deviceToken;
 };
 })(typeof exports === 'undefined' ? Apiomat
         : exports);
