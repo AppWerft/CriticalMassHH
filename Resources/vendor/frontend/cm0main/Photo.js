@@ -253,6 +253,15 @@ Apiomat.Photo.prototype.deletePhoto = function(_callback)
     }
 };
 
+        Apiomat.Photo.prototype.getRatio = function() 
+{
+    return this.data.ratio;
+};
+
+Apiomat.Photo.prototype.setRatio = function(_ratio) {
+    this.data.ratio = _ratio;
+};
+
         Apiomat.Photo.prototype.getTitle = function() 
 {
     return this.data.title;

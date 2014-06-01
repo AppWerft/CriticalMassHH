@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="de.appwerft.cm" android:versionCode="211" android:versionName="2.1.1">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="de.appwerft.cm" android:versionCode="225" android:versionName="2.2.5">
 	<uses-sdk android:minSdkVersion="10" android:targetSdkVersion="19"/>
 	<application android:icon="@drawable/appicon" android:label="CriticalMass" android:name="CriticalmassApplication" android:debuggable="false" android:theme="@style/Theme.Criticalmass">
 		<activity android:alwaysRetainTaskState="true" android:configChanges="keyboardHidden|orientation|screenSize" android:label="CriticalMass" android:launchMode="singleTop" android:name=".CriticalmassActivity" android:theme="@style/Theme.Titanium">
@@ -41,6 +41,7 @@
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 	<uses-permission android:name="android.permission.GET_ACCOUNTS"/>
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+	<uses-permission android:name="android.permission.CAMERA"/>
 	<uses-permission android:name="de.appwerft.cm.permission.MAPS_RECEIVE"/>
 	<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 	<uses-permission android:name="android.permission.VIBRATE"/>

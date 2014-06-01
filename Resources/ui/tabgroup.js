@@ -9,19 +9,18 @@ exports.create = function() {
 		title : 'Karte',
 		window : require('ui/map.window').create()
 	}), /*Ti.UI.createTab({
-		icon : Ti.Android ? null : '/assets/map.png',
-		title : 'Chat',
-		window : require('ui/chat.window').create()
-	}), */
+	 icon : Ti.Android ? null : '/assets/map.png',
+	 title : 'Chat',
+	 window : require('ui/chat.window').create()
+	 }), */
 	Ti.UI.createTab({
 		icon : Ti.Android ? null : '/assets/map.png',
 		title : 'Videos',
 		window : require('ui/videos.window').create()
-	}),
-	Ti.UI.createTab({
+	}), Ti.UI.createTab({
 		icon : Ti.Android ? null : '/assets/map.png',
-		title : 'Facebook',
-		window : require('ui/facebook.window').create()
+		title : 'RadlerPhotos',
+		window : require('ui/photolist.window').create()
 	}), Ti.UI.createTab({
 		icon : Ti.Android ? null : '/assets/map.png',
 		title : '#cm_hh',
@@ -43,8 +42,8 @@ exports.create = function() {
 	});
 	self.addEventListener("androidback", function() {
 		setTimeout(function() {
-				self.close();
-			}, 1000);
+			self.close();
+		}, 1000);
 		return false;
 	});
 	return self;

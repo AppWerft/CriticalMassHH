@@ -12,7 +12,6 @@ exports.create = function() {
 		}
 		var container = Ti.UI.createScrollableView({
 			showPagingControl : true,
-			
 			views : views
 		});
 		self.add(container);

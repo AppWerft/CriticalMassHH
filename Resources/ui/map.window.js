@@ -1,9 +1,7 @@
 Ti.Map = require('ti.map');
-
 exports.create = function() {
 	var options = arguments[0] || {};
 	var meetingpoint = null;
-
 	var ready = false;
 	var annotations = [];
 	var self = require('vendor/window').create({
@@ -22,7 +20,7 @@ exports.create = function() {
 	self.backgroundColor = 'black';
 	self.add(radlertext);
 	var mapoptions = {
-		mapType : Ti.Map.TERRAIN_TYPE,
+		mapType : Ti.Map.NORMAL_TYPE,
 		bottom : 20,
 		enableZoomControls : false,
 		region : {
@@ -33,7 +31,8 @@ exports.create = function() {
 		},
 		animate : true,
 		regionFit : true,
-		userLocation : false
+		traffic:true,
+		userLocation : true
 	};
 	self.mapview = Ti.App.SmartMap.getView(mapoptions);
 	self.updatemeetingpointannotation = function(_payload) {
@@ -62,13 +61,23 @@ exports.create = function() {
 			console.log('Error: no mapview');
 		}
 	};
-
+	var maptype = Ti.UI.createButton({
+		right : 5,
+		bottom : 5,
+		opacity : 0.8,
+		zIndex : 9999,
+		backgroundImage : '/assets/maptype.png',
+		width : 40,
+		height : 30
+	});
+	self.mapview.add(maptype);
 	self.mapview.addEventListener('changed', function(_e) {
 		radlertext.setText(_e.text);
 	});
 	self.addEventListener('focus', function() {
 		if (!ready) {
 			self.add(self.mapview);
+			self.mapview.add(maptype);
 			ready = true;
 		}
 	});
@@ -120,7 +129,15 @@ exports.create = function() {
 		});
 	};
 	Ti.App.SmartMap.startCron();
-
+	maptype.addEventListener('click', function() {
+		var type = self.mapview.getMapType();
+		console.log('A=' + type);
+		type++;
+		if (type == 5)
+			type = 1;
+		console.log('B=' + type);
+		self.mapview.setMapType(type);
+	});
 	return self;
 };
 

@@ -60,6 +60,14 @@ exports.get = function(self) {
 			activity.onCreateOptionsMenu = function(e) {
 				menu = e.menu;
 				e.menu.add({
+					title : "Photo",
+					itemId : "9",
+					icon : Ti.App.Android.R.drawable.ic_action_camera,
+					showAsAction : Ti.Android.SHOW_AS_ACTION_IF_ROOM,
+				}).addEventListener("click", function() {
+					require('ui/camera.widget').create();
+				});
+				e.menu.add({
 					title : "Twitter",
 					itemId : "8",
 					icon : Ti.App.Android.R.drawable.ic_action_twitter,
@@ -91,14 +99,19 @@ exports.get = function(self) {
 					checked : (Ti.App.Properties.hasProperty('RECORD')) ? true : false,
 					checkable : true,
 					visible : true
-				}).addEventListener("click", function() {
-					if ((Ti.App.Properties.hasProperty('RECORD'))) {
-						e.menu.getItem(1).checked = false;
+				}).addEventListener("click", function(_e) {
+					console.log('====Standortsenden angeklickt=========');
+					console.log('checked='+_e.source.checked);
+					if (_e.source.checked == true) {
+						_e.source.setChecked(false);
 						Ti.App.Properties.removeProperty('RECORD');
+						
 					} else {
+						_e.source.setChecked(true);
 						Ti.App.Properties.setString('RECORD', 'active');
-						e.menu.getItem(1).checked = true;
+
 					}
+					console.log('RECORD=' + Ti.App.Properties.hasProperty('RECORD'));
 				});
 				e.menu.add({
 					title : "Stadt wechseln",

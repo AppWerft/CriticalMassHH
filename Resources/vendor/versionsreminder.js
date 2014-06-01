@@ -3,7 +3,7 @@ exports.start = function() {
 	var xhr = Ti.Network.createHTTPClient({
 		onload : function() {
 			var t = /itemprop="softwareVersion">(.*?)</m.exec(this.responseText);
-			if (t && ( version = t[1].replace(/\s+/g, "")) != Ti.App.getVersion()) {
+			if (t && ( version = t[1].replace(/\s+/g, "")) != Ti.App.getVersion() && t[1].length<10) {
 				var r = Ti.UI.createAlertDialog({
 					cancel : 1,
 					buttonNames : ["Zum Store", "Abbruch"],

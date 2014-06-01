@@ -97,4 +97,88 @@ ApiomatAdapter.prototype.getAllRadler = function(_options,_callbacks) {
 		}
 	});
 };
+
+ApiomatAdapter.prototype.postPhoto = function(_args, _callbacks) {
+	var args = arguments[0] || {}, callbacks = arguments[1] || {}, that = this;
+	var myNewPhoto = new Apiomat.Photo();
+	myNewPhoto.setLocationLatitude(args.latitude);
+	// from getPosition
+	myNewPhoto.setLocationLongitude(args.longitude);
+	myNewPhoto.setTitle(args.title);
+	// ti.blob from camera
+	myNewPhoto.postPhoto(args.photo, function(e) {
+		console.log('Error: ' + e);
+	});
+	myNewPhoto.save({
+		onOK : function() {
+			console.log('Info: newPhoto.save successful');
+
+			Ti.Android && Ti.UI.createNotification({
+				message : 'Photo erhalten.'
+			}).show();
+			that.user.postmyPhotos(myNewPhoto, {
+				onOk : function() {
+					Ti.Android && Ti.UI.createNotification({
+						message : 'Photo erfolgreich gespeichert.'
+					}).show();
+					Ti.Media.vibrate();
+					console.log('Info: photo uploaded');
+				},
+				onError : function() {
+				}
+			});
+		},
+		onError : function() {
+		}
+	});
+
+};
+ApiomatAdapter.prototype.deletePhoto = function(_id, _callbacks) {
+	for (var i = 0; i < this.photos.length; i++) {
+		// only own phots has an id:
+		if (this.photos[i].data.id && this.photos[i].data.id == _id) {
+			this.photos[i].deleteModel({
+				onOk : function() {
+					Ti.Android && Ti.UI.createNotification({
+						message : 'Photo in Liste gelöscht'
+					}).show();
+					Ti.Media.vibrate();
+					_callbacks.ondeleted();
+					console.log('SUCCESSFUl deleted');
+				},
+				onError : function(error) {
+					console.log(error);
+				}
+			});
+			break;
+		}
+	}
+};
+ApiomatAdapter.prototype.getAllPhotos = function(_args, _callbacks) {
+	var that = this;
+	Apiomat.Photo.getPhotos("order by createdAt limit 500", {
+		onOk : function(_res) {
+			that.photos = _res;
+			var photolist = [];
+			for (var i = 0; i < that.photos.length; i++) {
+				var photo = that.photos[i];
+				var ratio = photo.getRatio() || 1.3;
+				photolist.push({
+					id : (photo.data.ownerUserName == that.user.getUserName())//
+					? photo.data.id : undefined,
+					latitude : photo.getLocationLatitude(),
+					longitude : photo.getLocationLongitude(),
+					title : photo.getTitle(),
+					ratio : ratio,
+					bigimage : photo.getPhotoURL(600, null, null, null, 'png') ,
+				});
+			}
+			_callbacks.onload(photolist);
+		},
+		onError : function(error) {
+			//handle error
+		}
+	});
+
+};
 module.exports = ApiomatAdapter;
