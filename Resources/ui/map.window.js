@@ -23,18 +23,22 @@ exports.create = function() {
 		mapType : Ti.Map.NORMAL_TYPE,
 		bottom : 20,
 		enableZoomControls : false,
-		region : {
-			latitude : 53.553270540,
-			longitude : 10.00963632,
-			latitudeDelta : 0.1,
-			longitudeDelta : 0.1
-		},
 		animate : true,
-		regionFit : true,
-		traffic:true,
+		regionFit : false,
+		traffic : false,
 		userLocation : true
 	};
 	self.mapview = Ti.App.SmartMap.getView(mapoptions);
+	self.mapview.addEventListener('complete', function() {
+		
+		self.mapview.setLocation({
+			latitude : 53.553,
+			longitude : 10.01,
+			latitudeDelta : 0.1,
+			longitudeDelta : 0.1,
+			animate: true
+		});
+	});
 	self.updatemeetingpointannotation = function(_payload) {
 		if (meetingpoint != null) {
 			self.mapview.removeAnnotation(meetingpoint);

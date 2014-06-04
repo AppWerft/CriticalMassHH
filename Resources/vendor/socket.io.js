@@ -94,7 +94,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
     };
 
     io.util.merge(options, details);
-
+	console.log(options);
     if (options['force new connection'] || !io.sockets[uuri]) {
       socket = new io.Socket(options);
     }
@@ -1323,10 +1323,12 @@ var io = ('undefined' === typeof module ? {} : module.exports);
     var xhr = Ti.Network.createHTTPClient({
       withCredentials: true,
       onload: function () {
+      	console.log(xhr.responseText);
         self.firstHandshake = false;
         complete(xhr.responseText);
       },
       onerror: function (ev) {
+      	console.log(ev);
         if (self.firstHandshake) {
           setTimeout(function () {
             self.handshake(fn);
@@ -1345,6 +1347,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
       }
     });
     xhr.open('GET', url, true);
+    console.log(url);
     xhr.send(null);
   };
 

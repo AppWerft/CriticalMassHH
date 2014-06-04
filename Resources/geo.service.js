@@ -19,7 +19,7 @@ var getPosition =function(e) {
 // start of background service :
 if (Ti.App.Properties.hasProperty('RECORD') && Ti.Geolocation.locationServicesEnabled) {
 	Ti.Geolocation.accuracy = Ti.Geolocation.ACCURACY_BEST;
-	Ti.Geolocation.distanceFilter = 50;
+	Ti.Geolocation.distanceFilter = 10;
 	Ti.Geolocation.preferredProvider = Ti.Geolocation.PROVIDER_GPS;
 	Ti.Geolocation.addEventListener('location', getPosition);
 }

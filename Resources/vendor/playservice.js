@@ -1,4 +1,4 @@
-exports.start = function() {
+module.exports = function() {
 	Ti.Map = require('ti.map');
 	console.log('Info: playservicetest started');
 	if (Ti.Map.isGooglePlayServicesAvailable() != Ti.Map.SUCCESS) {

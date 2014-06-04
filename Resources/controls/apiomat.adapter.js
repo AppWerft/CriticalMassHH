@@ -56,6 +56,7 @@ ApiomatAdapter.prototype.loginUser = function() {
 	return this;
 };
 
+
 ApiomatAdapter.prototype.setPosition = function(args) {
 	var that = this;
 	var myNewPosition = new Apiomat.Position();
@@ -75,8 +76,7 @@ ApiomatAdapter.prototype.getAllRadler = function(_options,_callbacks) {
 	var that = this;
 	var now = (parseInt(moment().unix()) - 120) * 1000;
 	// letzte 110sec in ms.
-	var query = "createdAt > date(" + now + ") order by createdAt DESC";
-	console.log('Info: QUERY=' + query);
+	var query = "createdAt > date(" + now + ") order by createdAt";
 	Apiomat.Position.getPositions(query, {
 		onOk : function(_positions) {
 			var positions = _positions;

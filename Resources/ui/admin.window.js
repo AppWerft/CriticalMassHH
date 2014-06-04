@@ -63,6 +63,14 @@ exports.create = function() {
 		regionFit : true,
 		userLocation : false
 	});
+	self.mapview.addEventListener('regionchanged', function(_e) {
+		return;
+		var region= _e.source.region;
+		region.latitudeDelta=region.latitudeDelta*1.1;
+		region.longitudeDelta=region.longitudeDelta*1.1;
+		
+		console.log(_e);self.mapview.setLocation(region);
+	});
 	self.input = Ti.UI.createTextField({
 		color : '#eee',
 		left : 0,
@@ -101,10 +109,9 @@ exports.create = function() {
 							require('vendor/geo.resolve').get({
 								city : _res
 							}, function(_geo) {
-								console.log(_geo);
 								if (!_geo.res.lat)
 									return;
-								getAddress(_geo.res.lat,_geo.res.lng);
+								getAddress(_geo.res.lat, _geo.res.lng);
 								var region = self.mapview.getRegion();
 								region.latitude = _geo.res.lat;
 								region.longitude = _geo.res.lng;
@@ -148,7 +155,7 @@ exports.create = function() {
 	});
 	Ti.Geolocation.getCurrentPosition(function(_e) {
 		if (_e.success) {
-			console.log(_e.coords);
+
 			getAddress(_e.coords.latitude, _e.coords.longitude);
 			self.mapview.setRegion({
 				latitude : _e.coords.latitude,

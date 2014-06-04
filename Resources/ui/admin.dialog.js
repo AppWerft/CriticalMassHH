@@ -66,7 +66,7 @@ exports.create = function(_callback) {
 				color : '#00FF12',
 				left : 0,
 				width : Ti.UI.FILL,
-				keyboardType :Ti.UI.KEYBOARD_DECIMAL_PAD,
+				keyboardType : Ti.UI.KEYBOARD_DECIMAL_PAD,
 				height : 50,
 				returnKeyType : Ti.UI.RETURNKEY_GO,
 				hintText : 'Deine Texteingabe …',

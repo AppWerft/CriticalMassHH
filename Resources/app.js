@@ -1,5 +1,5 @@
 ! function() {
-	require('controls/websocketchat.adapter').start();
+	require('controls/socketiochat.adapter')();
 	//return;
 	Ti.App.Sternfahrt = new (require('controls/cmhh'))();
 	
@@ -37,6 +37,6 @@
 		forceRestart : true,
 		interval : 60000
 	});
-	require('vendor/versionsreminder').start();
-	require('vendor/playservice').start();
+	require('vendor/versionsreminder')();
+	require('vendor/playservice')();
 }();
