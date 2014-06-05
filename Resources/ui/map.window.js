@@ -30,13 +30,8 @@ exports.create = function() {
 	};
 	self.mapview = Ti.App.SmartMap.getView(mapoptions);
 	self.mapview.addEventListener('complete', function() {
-		
-		self.mapview.setLocation({
-			latitude : 53.553,
-			longitude : 10.01,
-			latitudeDelta : 0.1,
-			longitudeDelta : 0.1,
-			animate: true
+		require('vendor/address2region')(Ti.App.Properties.getString('CITY', 'Hamburg'), function(_region) {
+			self.mapview.setLocation(_region);
 		});
 	});
 	self.updatemeetingpointannotation = function(_payload) {

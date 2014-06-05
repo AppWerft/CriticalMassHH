@@ -8,11 +8,11 @@ exports.create = function() {
 		icon : Ti.Android ? null : '/assets/map.png',
 		title : 'Karte',
 		window : require('ui/map.window').create()
-	}), /*Ti.UI.createTab({
+	}),Ti.UI.createTab({
 	 icon : Ti.Android ? null : '/assets/map.png',
 	 title : 'Chat',
-	 window : require('ui/chat.window').create()
-	 }), */
+	 window : require('ui/socketio.chat.window').create()
+	 }),
 	Ti.UI.createTab({
 		icon : Ti.Android ? null : '/assets/map.png',
 		title : 'Videos',

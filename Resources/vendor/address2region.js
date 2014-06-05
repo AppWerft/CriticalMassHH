@@ -1,4 +1,4 @@
-module.exports = function(_country, _callback) {
+module.exports = function(_address, _callback) {
 	var client = Ti.Network.createHTTPClient({
 		onload : function() {
 			try {
@@ -8,8 +8,8 @@ module.exports = function(_country, _callback) {
 					var region = {
 						latitude : result.location.lat,
 						longitude : result.location.lng,
-						latitudeDelta : Math.abs(result.viewport.northeast.lat - result.viewport.southwest.lat),
-						longitudeDelta : Math.abs(result.viewport.northeast.lng - result.viewport.southwest.lng)
+						latitudeDelta : 1.2*(Math.abs(result.viewport.northeast.lat - result.viewport.southwest.lat)),
+						longitudeDelta : 1.2*(Math.abs(result.viewport.northeast.lng - result.viewport.southwest.lng))
 					};
 					_callback(region);
 				}
@@ -18,7 +18,7 @@ module.exports = function(_country, _callback) {
 			}
 		}
 	});
-	var url = 'http://maps.googleapis.com/maps/api/geocode/json?address=' + _country + '&sensor=false';
+	var url = 'http://maps.googleapis.com/maps/api/geocode/json?address=' + _address + '&sensor=false';
 	client.open('GET', url);
 	client.send();
 };

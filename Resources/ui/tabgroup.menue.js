@@ -45,9 +45,7 @@ exports.get = function(self) {
 			require('ui/city.dialog').create(/*callback */
 			function(_city) {
 				if (_city) {
-					Ti.App.CloudPush.subscribeChannel('chat', function(_e) {
-					});
-					activity.actionBar.setSubtitle(_city);
+					activity.actionBar.setSubtitle(Ti.App.Properties.getString('CHATUSER')+'@'+_city);
 				}
 			});
 		}
@@ -73,8 +71,8 @@ exports.get = function(self) {
 					icon : Ti.App.Android.R.drawable.ic_action_twitter,
 					showAsAction : Ti.Android.SHOW_AS_ACTION_IF_ROOM,
 				}).addEventListener("click", function() {
-					self.activeTab = 3;
-					self.tabs[3].getWindow().fireEvent('write!');
+					self.activeTab = 4;
+					self.tabs[4].getWindow().fireEvent('write!');
 				});
 				e.menu.add({
 					title : "Parole aufsprechen",
@@ -121,6 +119,9 @@ exports.get = function(self) {
 				}).addEventListener("click", function() {
 					require('ui/city.dialog').create(function(_city) {
 						activity.actionBar.setSubtitle(_city);
+						require('vendor/address2region')(_city,function(_region){
+							self.tabs[0].getWindow().mapview.setRegion(_region);
+						});
 					});
 				});
 				e.menu.add({

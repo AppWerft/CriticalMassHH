@@ -1,12 +1,11 @@
 ! function() {
-	require('controls/socketiochat.adapter')();
-	//return;
+
 	Ti.App.Sternfahrt = new (require('controls/cmhh'))();
-	
+
 	Ti.App.Speechrecognizer = require('jp.isisredirect.speechrecognizer');
 	Ti.App.CloudPush = new (require('controls/cloudpush.adapter'))(function(_e) {
 		if (_e.success) {
-			
+
 		}
 	});
 	Ti.App.Twitter = new (require('controls/twitter_adapter'))();

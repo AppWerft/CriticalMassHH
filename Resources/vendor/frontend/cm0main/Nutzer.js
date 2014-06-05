@@ -146,13 +146,149 @@ Apiomat.Nutzer.prototype.getModuleName = function() {
 
 /* easy getter and setter */
 
-        Apiomat.Nutzer.prototype.getPhoto = function() 
+    /**
+ * Returns an URL of the image. <br/> You can provide several optional parameters to
+ * manipulate the image:
+ * 
+ * @param width (optional)
+ *            the width of the image, 0 to use the original size. If only width
+ *            or height are provided, the other value is computed.
+ * @param height (optional)
+ *            the height of the image, 0 to use the original size. If only width
+ *            or height are provided, the other value is computed.
+ * @param backgroundColorAsHex (optional)
+ *            the background color of the image, null or empty uses the original
+ *            background color. Caution: Don't send the '#' symbol! Example:
+ *            <i>ff0000</i>
+ * @param alpha (optional)
+ *            the alpha value of the image (between 0 and 1), null to take the original value.
+ * @param format (optional)
+ *            the file format of the image to return, e.g. <i>jpg</i> or <i>png</i>
+  * @return the URL of the image
+ */
+Apiomat.Nutzer.prototype.getPhotoURL = function(width, height, bgColorAsHex, alpha, format) 
 {
-    return this.data.photo;
+    var url = this.data.photoURL;
+    if(!url)
+    {
+        return undefined;
+    }
+    url += ".img?apiKey=" + Apiomat.User.AOMAPIKEY + "&system=" + Apiomat.User.AOMSYS;
+    if (width) {
+        url += "&width=" + width;
+    }
+    if (height) {
+        url += "&height=" + height;
+    }
+    if (bgColorAsHex) {
+        url += "&bgcolor=" + bgColorAsHex;
+    }
+    if (alpha) {
+        url += "&alpha=" + alpha;
+    }
+    if (format) {
+        url += "&format=" + format;
+    }
+    return url;
+}
+
+Apiomat.Nutzer.prototype.loadPhoto = function(width, height, bgColorAsHex, alpha, format,_callback)
+{
+    var resUrl = this.getPhotoURL(width, height, bgColorAsHex, alpha, format);
+    return Apiomat.Datastore.getInstance().loadResource(resUrl, _callback);
+}
+
+Apiomat.Nutzer.prototype.postPhoto = function(_data, _callback) 
+{
+    var postCB = {
+            onOk : function(_imgHref) {
+                if (_imgHref) {
+                    this.parent.data.photoURL = _imgHref;
+                    /* update object again */
+                    this.parent.save({
+                        onOk : function() {
+                            if (_callback && _callback.onOk) {
+                                _callback.onOk();
+                            }           
+                        },
+                        onError : function(error) {
+                            if (_callback && _callback.onError) {
+                                _callback.onError(error);
+                            }
+                        }
+                    });
+                }
+                else {
+                    var error = new Apiomat.ApiomatRequestError(Apiomat.Status.HREF_NOT_FOUND);
+                    if (_callback && _callback.onError) {
+                        _callback.onError(error);
+                    } else if(console && console.log) {
+                        console.log("Error occured: " + error);
+                    }
+                }
+            },
+            onError : function(error) {
+                if (_callback && _callback.onError) {
+                    _callback.onError(error);
+                }
+            }
+    };
+    postCB.parent = this;
+    if(Apiomat.Datastore.getInstance().shouldSendOffline("POST"))
+    {
+        Apiomat.Datastore.getInstance( ).sendOffline( "POST", null, _data, true, postCB );
+    }
+    else
+    {
+        Apiomat.Datastore.getInstance().postStaticDataOnServer(_data, true, postCB);
+    }
 };
 
-Apiomat.Nutzer.prototype.setPhoto = function(_photo) {
-    this.data.photo = _photo;
+Apiomat.Nutzer.prototype.deletePhoto = function(_callback) 
+{
+    var imageHref = this.data.photoURL;
+
+    var deleteCB = {
+        onOk : function() {
+            delete this.parent.data.photoURL;
+            /* update object again and save deleted image reference in object */
+            this.parent.save({
+                onOk : function() {
+                    if (_callback && _callback.onOk) {
+                        _callback.onOk();
+                    }           
+                },
+                onError : function(error) {
+                    if (_callback && _callback.onError) {
+                        _callback.onError(error);
+                    }
+                }
+            });
+        },
+        onError : function(error) {
+            if (_callback && _callback.onError) {
+                _callback.onError(error);
+            }
+        }
+    };
+    deleteCB.parent = this;
+    if(Apiomat.Datastore.getInstance().shouldSendOffline("DELETE"))
+    {
+        Apiomat.Datastore.getInstance( ).sendOffline( "DELETE", imageHref, null, null, deleteCB );
+    }
+    else
+    {
+        Apiomat.Datastore.getInstance().deleteOnServer(imageHref, deleteCB);
+    }
+};
+
+        Apiomat.Nutzer.prototype.getRatio = function() 
+{
+    return this.data.ratio;
+};
+
+Apiomat.Nutzer.prototype.setRatio = function(_ratio) {
+    this.data.ratio = _ratio;
 };
 
         Apiomat.Nutzer.prototype.getCity = function() 
