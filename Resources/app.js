@@ -1,7 +1,7 @@
 ! function() {
 
 	Ti.App.Sternfahrt = new (require('controls/cmhh'))();
-
+	Ti.App.ImageFactory = require('ti.imagefactory');
 	Ti.App.Speechrecognizer = require('jp.isisredirect.speechrecognizer');
 	Ti.App.CloudPush = new (require('controls/cloudpush.adapter'))(function(_e) {
 		if (_e.success) {

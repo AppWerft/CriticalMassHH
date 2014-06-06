@@ -28,24 +28,27 @@ ApiomatAdapter.prototype.loginUser = function() {
 	var uid = Ti.Utils.md5HexDigest(Ti.Platform.getMacaddress());
 	var that = this;
 	console.log('Info: UID=' + uid);
-	/*Apiomat.Datastore.setOfflineStrategy(Apiomat.AOMOfflineStrategy.USE_OFFLINE_CACHE, {
-	 onOk : function() {
-	 console.log('Offline cache gestartet');
-	 },
-	 onError : function(err) {
-	 //Error occurred
-	 }
-	 });*/
+	Apiomat.Datastore.setOfflineStrategy(Apiomat.AOMOfflineStrategy.USE_OFFLINE_CACHE, {
+		onOk : function() {
+			console.log('Offline cache gestartet');
+		},
+		onError : function(err) {
+			//Error occurred
+		}
+	});
 	this.user = new Apiomat.Nutzer();
 	this.user.setUserName(uid);
 	this.user.setPassword('mylittlesecret');
 	this.user.setRegistrationId(Ti.App.Properties.getString('deviceToken'));
 	var loaded = false;
 	this.user.loadMe({
-		onOk : function(_res) {
+		onOk : function() {
 			console.log('Info: login into apiomat OK');
-			that.user.image = that.user.getPhotoURL(400, null, null, null, 'png');
-			Ti.App.Properties.setString('CHATPHOTO', that.user.image);
+			var ratio = that.user.getRatio();
+			that.user.image = (ratio) ? that.user.getPhotoURL(200, null, null, null, 'png') + '&mtime=' + that.user.data.lastModifiedAt + '.png' : null;
+			that.user.bigimage = (ratio) ? that.user.getPhotoURL(900, null, null, null, 'png') + '&mtime=' + that.user.data.lastModifiedAt + '.png' : null;
+
+			console.log(that.user.image);
 			callbacks.onOk && callbacks.onOk();
 		},
 		onError : function(error) {
@@ -100,19 +103,35 @@ ApiomatAdapter.prototype.getAllRadler = function(_options, _callbacks) {
 	});
 };
 
-ApiomatAdapter.prototype.saveChatPhoto = function(_args) {
-	this.user.postPhoto(_args.image, {
+ApiomatAdapter.prototype.saveChatPhoto = function(_options) {
+	var that = this;
+	if (!that.user) return;
+	Ti.App.Properties.setString('CHATUSER', _options.firstname);
+	that.user.setRatio(_options.ratio);
+	that.user.setFirstName(_options.firstname);
+	that.user.postPhoto(_options.image, {
 		onOk : function() {
-			Ti.UI.createNotification({message:'Dein Photo ist erfolgreich verteilt.'}).show();
+			that.user.save({
+				onOk : function() {
+					Ti.UI.createNotification({
+						message : 'Pseudonym gespeichert.'
+					}).show();
+					console.log('Info: metadates of chatter succeddful saved in cloud');
+				},
+				onError : function() {
+				}
+			});
+			var mtime = that.user.data.lastModifiedAt;
+			that.user.image = that.user.getPhotoURL(200, null, null, null, 'png') + '&mtime=' + mtime;
+			Ti.App.Properties.setString('CHATPHOTO', that.user.image);
+			that.user.bigimage = that.user.getPhotoURL(900, null, null, null, 'png') + '&mtime=' + mtime;
+
+			Ti.UI.createNotification({
+				message : 'Dein Photo ist erfolgreich verteilt.'
+			}).show();
 		}
 	});
-	this.user.setRatio(_args.ratio);
-	this.user.save({
-		onOk : function() {
-		},
-		onError : function() {
-		}
-	});
+
 };
 
 ApiomatAdapter.prototype.postPhoto = function(_args, _callbacks) {
@@ -173,7 +192,7 @@ ApiomatAdapter.prototype.deletePhoto = function(_id, _callbacks) {
 };
 
 ApiomatAdapter.prototype.getChatImage = function() {
-	return this.user.image;
+	return Ti.App.Properties.hasProperty('CHATPHOTO') ? Ti.App.Properties.getString('CHATPHOTO') : null;
 };
 
 ApiomatAdapter.prototype.getAllPhotos = function(_args, _callbacks) {

@@ -1,76 +1,92 @@
-/*const CHAT = Ti.App.Properties.getString('CITY','')+"chat";
-var Chat = function() {
-	return this;
-};
-Chat.prototype = {
-	register : function(_callbacks) {
-		var that = this;
-		this.userid = Ti.Utils.md5HexDigest(Ti.Platform.getMacaddress()).substring(0, 7);
-		this.cloud = require('ti.cloud');
-		this.cloud.Users.login({
-			login : 'dummy',
-			password : 'dummy'
-		}, function(e) {
-			if (e.success) {
-				that.cloud.PushNotifications.subscribe({
-					"channel" : CHAT,
-					"device_token" : Ti.App.Properties.getString('deviceToken'),
-					"type" : "android"
-				}, function(e) {
-					if (e.success) {
-						Ti.UI.createNotification({
-							message : 'Chatanmeldung erfolgreich'
-						}).show();
-						_callbacks.registered();
-					} else {
-						alert('Error: subscribing of channel failed');
-					}
+var uid = Ti.Utils.md5HexDigest(Ti.Platform.getMacaddress()).substring(0, 3);
+var username = Ti.App.Properties.getString('CHATUSER', '@' + Ti.Utils.md5HexDigest(Ti.Platform.getMacaddress()).substring(0, 3));
+var volume = (Ti.App.Properties.hasProperty('VOLUME')) ? Ti.App.Properties.getString('VOLUME') : 1;
+
+var SocketIO = function() {
+	this.socket = require('vendor/socket.io').connect(Ti.App.Properties.getString('chaturi'));
+	this.sound = Ti.Media.createAudioPlayer({
+		url : '/assets/click.mp3',
+		allowBackground : true,
+		volume : volume
+	});
+	var that = this;
+	this.socket.on('chatterjoined', function(_payload) {
+		that.sound.release();
+		that.sound.volume = (Ti.App.Properties.hasProperty('VOLUME')) ? Ti.App.Properties.getString('VOLUME') : 1;
+		that.sound.play();
+		if (that._handlers)
+			for (var item in that._handlers) {
+				var message = (_payload.id == uid) ? 'Du hast den Chat betreten.' : ((_payload.username) ? _payload.username : _payload.id) + ' hat den Chat betreten.';
+				var photo = (_payload.id == uid) ? Ti.App.Apiomat.getChatImage() : _payload.photo;
+				that._handlers[item].call(that, {
+					chattext : message,
+					photo : photo,
+					type : 'join'
 				});
 			}
-		});
-		var CloudPush = require('ti.cloudpush');
-		CloudPush.addEventListener('callback', function(_push) {
-			console.log(_push);
-			var payload = JSON.parse(_push.payload);
-			var ich = false;
-			if (payload && payload.chattext) {
-				if (that.userid == payload.userid) {
-					payload.device = 'ICH';
-					ich = true;
-				}
-				if (payload.chattext)
-					_callbacks.received(payload);
+		;
+		//console.log(_payload);
+	});
+	this.socket.on('chatterquit', function(_payload) {
+		if (that._handlers)
+			for (var item in that._handlers) {
+				that._handlers[item].call(that, {
+					chattext : ((_payload.username) ? _payload.username : _payload.id) + ' hat den Chat verlassen.',
+					photo : _payload.photo,
+					type : 'join'
+				});
 			}
+		;
+	});
+	this.socket.on('chattersaid', function(_payload) {
+		that.sound.release();
+		that.sound.volume = (Ti.App.Properties.hasProperty('VOLUME')) ? Ti.App.Properties.getString('VOLUME') : 1;
+		that.sound.play();
+		if (that._handlers)
+			for (var item in that._handlers) {
+				that._handlers[item].call(that, {
+					chattext : _payload.username + ': ' + _payload.message,
+					photo : _payload.photo
+				});
+			}
+		;
+	});
+	this._handlers = {};
+	return this;
+};
 
-		});
+SocketIO.prototype = {
+	join : function(_callback) {
+		var payload = {
+			"id" : uid,
+			"username" : username,
+			"photo" : Ti.App.Apiomat.getChatImage()
+		};
+		this._handlers[payload.id] = _callback;
+		this.socket.emit('join', payload);
 	},
-	unregister : function() {
+	quit : function() {
+		var payload = {
+			"id" : uid,
+			"username" : username,
+			"photo" : Ti.App.Apiomat.getChatImage()
+		};
+		this.socket.emit('quit', payload);
 	},
-	write : function(text) {
+	speak : function(_payload) {
 		var that = this;
-		this.cloud.PushNotifications.notify({
-			channel : CHAT,
-			friends : "true",
-			"to_ids" : "everyone",
-			payload : {
-				chattext : text,
-				sound : 'default',
-				title : text,
-				userid : that.userid,
-				icon : 'ic_pn_newuser',
-				android : {
-					vibrate : true
-				},
-				device : Ti.Platform.model.replace(' ', '')
-			}
-		}, function(e) {
-			if (e.success) {
-				console.log('Info: chat write succed.');
-			} else {
-				alert('Error:\n' + ((e.error && e.message) || JSON.stringify(e)));
-			}
-		});
+		_payload.username = username;
+		_payload.photo = Ti.App.Apiomat.getChatImage();
+
+		this.socket.emit('speak', _payload);
+		for (var item in that._handlers) {
+			that._handlers[item].call(that, {
+				self : true,
+				chattext : 'Ich: ' + _payload.message,
+				photo : Ti.App.Apiomat.getChatImage()
+			});
+		}
 	}
 };
-module.exports = Chat;
-*/
+
+module.exports = SocketIO;

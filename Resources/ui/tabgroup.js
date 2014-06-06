@@ -11,7 +11,7 @@ exports.create = function() {
 	}),Ti.UI.createTab({
 	 icon : Ti.Android ? null : '/assets/map.png',
 	 title : 'Chat',
-	 window : require('ui/socketio.chat.window').create()
+	 window : require('ui/chat.window').create()
 	 }),
 	Ti.UI.createTab({
 		icon : Ti.Android ? null : '/assets/map.png',
