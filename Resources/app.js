@@ -1,5 +1,5 @@
 ! function() {
-
+	var tabgroup = null;
 	Ti.App.Sternfahrt = new (require('controls/cmhh'))();
 	Ti.App.ImageFactory = require('ti.imagefactory');
 	Ti.App.Speechrecognizer = require('jp.isisredirect.speechrecognizer');
@@ -22,20 +22,10 @@
 				tabgroup.close();
 		}
 	});
-	var tabgroup = require('ui/tabgroup').create();
-	tabgroup.open();
-	require('controls/georecord.dialog').create();
-	/* starting of backgroudn geo recording : */
-	var alarmModule = require('bencoding.alarmmanager');
-	var alarmManager = alarmModule.createAlarmManager();
-	alarmManager.addAlarmService({
-		service : 'de.appwerft.cm.Geo_serviceService',
-		minute : 1,
-		requestCode : 41,
-		second : 0,
-		forceRestart : true,
-		interval : 60000
+	var splash = require('ui/splash.window')(function() {
+		tabgroup = require('ui/tabgroup').create();
+		tabgroup.open();
 	});
-	require('vendor/versionsreminder')();
-	require('vendor/playservice')();
+	require('controls/alarm.manager')();
+	Ti.Android && require('vendor/versionsreminder')();
 }();

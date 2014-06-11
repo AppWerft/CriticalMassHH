@@ -8,7 +8,6 @@ var CP = function(_callback) {
 	CloudPush.addEventListener('callback', function(_payload) {
 		var payload = JSON.parse(_payload.payload);
 		if (payload.latlng) {
-			console.log(JSON.stringify(payload));
 			Ti.App.Properties.setObject('POSITION', payload);
 			Ti.App.fireEvent('newposition', payload);
 		}

@@ -99,15 +99,14 @@ exports.get = function(self) {
 					visible : true
 				}).addEventListener("click", function(_e) {
 					console.log('====Standortsenden angeklickt=========');
-					console.log('checked='+_e.source.checked);
-					if (_e.source.checked == true) {
-						_e.source.setChecked(false);
+					var item = _e.source;
+					console.log(item);
+					if (item.checked == true) {
+						item.setChecked(false);
 						Ti.App.Properties.removeProperty('RECORD');
-						
 					} else {
-						_e.source.setChecked(true);
+						item.setChecked(true);
 						Ti.App.Properties.setString('RECORD', 'active');
-
 					}
 					console.log('RECORD=' + Ti.App.Properties.hasProperty('RECORD'));
 				});

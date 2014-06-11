@@ -17,5 +17,8 @@ exports.create = function() {
 			}
 		});
 	};
+	self.addEventListener("focus", function(e) {
+        //self.getActivity().invalidateOptionsMenu();
+    });
 	return self;
 };

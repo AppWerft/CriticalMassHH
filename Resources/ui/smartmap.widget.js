@@ -18,8 +18,8 @@ SmartMap.prototype.getView = function(_options) {
 	mapview = Ti.Map.createView(_options);
 	return mapview;
 };
+
 SmartMap.prototype.updateAnnotations = function() {
-	
 	Ti.App.Apiomat.getAllRadler(null, {
 		onError : function() {
 			console.log('Error: adapter.getallradler() sends error');

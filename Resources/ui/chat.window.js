@@ -8,8 +8,18 @@ exports.create = function() {
 	});
 	self.container = Ti.UI.createTableView({
 		backgroundColor : 'black',
-		bottom : 50
+		bottom : 50,
+		top : 80,
 	});
+	self.chatter = Ti.UI.createScrollView({
+		backgroundColor : '#222',
+		top : 0,
+		height : 80,
+		scrollType : 'horizontal',
+		layout : 'horizontal',
+		horizontalWrap : false
+	});
+	self.add(self.chatter);
 	self.add(self.container);
 	var input = Ti.UI.createTextField({
 		color : '#00FF12',
@@ -63,36 +73,44 @@ exports.create = function() {
 
 	self.addEventListener('open', function() {
 		Chat.join(function(_payload) {// this is callback from adapter
-			var row = Ti.UI.createTableViewRow();
-			counter++;
-			var thumb = Ti.UI.createImageView({
-				left : (_payload.type == 'join') ? 43 : 5,
-				bottom : 5,
-				top : 0,
-				width : (_payload.type == 'join') ? 32 : 80,
-				height : (_payload.type == 'join') ? 32 : 80,
-				image : (_payload.photo) ? _payload.photo : '/assets/schurke.png'
-			});
-			require('vendor/imagecache')(_payload.photo, thumb);
-			row.add(thumb);
-			row.add(Ti.UI.createLabel({
-				text : _payload.chattext,
-				left : 100,
-				top : 5,
-				bottom : 5,
-				height : Ti.UI.SIZE,
-				opacity : (_payload.self) ? 0.5 : 1,
-				textAlign : 'left',
-				width : Ti.UI.FILL,
-				right : 5,
-				color : '#00FF12',
-				font : {
-					fontSize : (_payload.type == 'join') ? 12 : 20,
-					fontFamily : 'LW'
+			if (_payload.type == 'chatters') {
+				self.chatter.removeAllChildren();
+				var chatters = _payload.chatters;
+				for (var i = 0; i < chatters.length; i++) {
+					self.chatter.add(require('ui/chatter.widget').create(chatters[i]));
 				}
-			}));
-			self.container.appendRow(row);
-			self.container.scrollToIndex(counter);
+			} else {
+				var row = Ti.UI.createTableViewRow();
+				counter++;
+				var thumb = Ti.UI.createImageView({
+					left : (_payload.type == 'join') ? 43 : 5,
+					bottom : 5,
+					top : 0,
+					width : (_payload.type == 'join') ? 32 : 80,
+					height : (_payload.type == 'join') ? 32 : 80,
+					image : (_payload.photo) ? _payload.photo : '/assets/schurke.png'
+				});
+				require('vendor/imagecache')(_payload.photo, thumb);
+				row.add(thumb);
+				row.add(Ti.UI.createLabel({
+					text : _payload.chattext,
+					left : 100,
+					top : 5,
+					bottom : 5,
+					height : Ti.UI.SIZE,
+					opacity : (_payload.self) ? 0.5 : 1,
+					textAlign : 'left',
+					width : Ti.UI.FILL,
+					right : 5,
+					color : '#00FF12',
+					font : {
+						fontSize : (_payload.type == 'join') ? 12 : 20,
+						fontFamily : 'LW'
+					}
+				}));
+				self.container.appendRow(row);
+				self.container.scrollToIndex(counter);
+			}
 		});
 	});
 	return self;

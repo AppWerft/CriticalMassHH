@@ -10,7 +10,7 @@ var SocketIO = function() {
 		volume : volume
 	});
 	var that = this;
-	this.socket.on('chatterjoined', function(_payload) {
+	this.socket.on('chatter_joined', function(_payload) {
 		that.sound.release();
 		that.sound.volume = (Ti.App.Properties.hasProperty('VOLUME')) ? Ti.App.Properties.getString('VOLUME') : 1;
 		that.sound.play();
@@ -27,7 +27,18 @@ var SocketIO = function() {
 		;
 		//console.log(_payload);
 	});
-	this.socket.on('chatterquit', function(_payload) {
+	this.socket.on('chatter_already_joined', function(_payload) {
+		if (that._handlers) {
+			for (var item in that._handlers) {
+				that._handlers[item].call(that, {
+					chatters : _payload,
+					type : 'chatters'
+				});
+			}
+		}
+		console.log(_payload);
+	});
+	this.socket.on('chatter_quit', function(_payload) {
 		if (that._handlers)
 			for (var item in that._handlers) {
 				that._handlers[item].call(that, {
@@ -38,7 +49,7 @@ var SocketIO = function() {
 			}
 		;
 	});
-	this.socket.on('chattersaid', function(_payload) {
+	this.socket.on('chatter_said', function(_payload) {
 		that.sound.release();
 		that.sound.volume = (Ti.App.Properties.hasProperty('VOLUME')) ? Ti.App.Properties.getString('VOLUME') : 1;
 		that.sound.play();
