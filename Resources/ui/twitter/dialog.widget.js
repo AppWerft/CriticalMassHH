@@ -17,7 +17,7 @@ exports.create = function(_parent, _e) {
 
 	var dialog = null;
 	var tweetdata = _e.rowData;
-	
+
 	var uri_pattern = /\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/ig;
 	var uri = tweetdata.tweet.match(uri_pattern);
 	var options = ['Twitter-Profil'];
@@ -43,7 +43,10 @@ exports.create = function(_parent, _e) {
 					subtitle : uri[0]
 				});
 				win.add(Ti.UI.createWebView({
-					url : uri[0]
+					url : uri[0],
+					softKeyboardOnFocus : Ti.UI.Android.SOFT_KEYBOARD_HIDE_ON_FOCUS,
+					zoomControlEnabled : false,
+
 				}));
 				Ti.Android && Ti.UI.createNotification({
 					message : uri[0]

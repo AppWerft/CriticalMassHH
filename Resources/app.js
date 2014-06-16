@@ -9,7 +9,7 @@
 		}
 	});
 	Ti.App.Twitter = new (require('controls/twitter_adapter'))();
-	Ti.App.SmartMap = new (require('ui/smartmap.widget'))();
+	
 	Ti.App.Apiomat = new (require('controls/apiomat.adapter'))({
 		ononline : function() {
 

@@ -42,9 +42,9 @@ exports.init = function() {
 									alert : 'Ein Radler mit einem ' + Ti.Platform.getModel() + ' hat sich zu cmHH angemeldet',
 									title : 'cmHH hat einen neuen Mitmacher.',
 									badget : '+1',
-									sound : 'klingel',
+									//sound : 'klingel',
 									icon : 'ic_pn_newuser',
-									vibrate : true
+									vibrate : false
 								}
 							}, function(e) {
 								if (e.success) {
@@ -116,6 +116,8 @@ exports.sendPosition = function(_message, callback) {
 				android : {
 					vibrate : true
 				},
+				vibrate : true,
+				sound : 'klingel',
 				timestamp : new Date(),
 				icon : 'ic_pn_newuser'
 			};

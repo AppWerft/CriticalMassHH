@@ -13,11 +13,11 @@ exports.create = function() {
 	 title : 'Chat',
 	 window : require('ui/chat.window').create()
 	 }),
-	Ti.UI.createTab({
+	/*Ti.UI.createTab({
 		icon : Ti.Android ? null : '/assets/map.png',
-		title : 'Videos',
-		window : require('ui/videos.window').create()
-	}), Ti.UI.createTab({
+		title : 'Zeitraffarchiv',
+		window : require('ui/archiv.window').create()
+	}), */Ti.UI.createTab({
 		icon : Ti.Android ? null : '/assets/map.png',
 		title : 'RadlerPhotos',
 		window : require('ui/photolist.window').create()

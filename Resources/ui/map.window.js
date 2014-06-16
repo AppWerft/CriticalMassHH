@@ -1,9 +1,11 @@
 Ti.Map = require('ti.map');
+
 exports.create = function() {
 	var options = arguments[0] || {};
 	var meetingpoint = null;
 	var ready = false;
 	var annotations = [];
+	var SmartMap = new (require('ui/smartmap.widget'))();
 	var self = require('vendor/window').create({
 	});
 	var radlertext = Ti.UI.createLabel({
@@ -25,10 +27,10 @@ exports.create = function() {
 		enableZoomControls : false,
 		animate : true,
 		regionFit : false,
-		traffic : false,
-		userLocation : true
+		traffic : true,
+		userLocation : Ti.App.Properties.hasProperty('RECORD')?true:false
 	};
-	self.mapview = Ti.App.SmartMap.getView(mapoptions);
+	self.mapview = SmartMap.getView(mapoptions);
 	self.mapview.addEventListener('complete', function() {
 		require('vendor/address2region')(Ti.App.Properties.getString('CITY', 'Hamburg'), function(_region) {
 			self.mapview.setLocation(_region);
@@ -60,23 +62,15 @@ exports.create = function() {
 			console.log('Error: no mapview');
 		}
 	};
-	var maptype = Ti.UI.createButton({
-		right : 5,
-		bottom : 5,
-		opacity : 0.8,
-		zIndex : 9999,
-		backgroundImage : '/assets/maptype.png',
-		width : 40,
-		height : 30
-	});
-	self.mapview.add(maptype);
 	self.mapview.addEventListener('changed', function(_e) {
 		radlertext.setText(_e.text);
+	});
+	self.mapview.addEventListener('longclick', function(_e) {
+		self.mapview.setMapType((self.mapview.getMapType() == Ti.Map.NORMAL_TYPE) ? Ti.Map.TERRAIN_TYPE : Ti.Map.NORMAL_TYPE);
 	});
 	self.addEventListener('focus', function() {
 		if (!ready) {
 			self.add(self.mapview);
-			self.mapview.add(maptype);
 			ready = true;
 		}
 	});
@@ -127,16 +121,7 @@ exports.create = function() {
 			duration : 700
 		});
 	};
-	Ti.App.SmartMap.startCron();
-	maptype.addEventListener('click', function() {
-		var type = self.mapview.getMapType();
-		console.log('A=' + type);
-		type++;
-		if (type == 5)
-			type = 1;
-		console.log('B=' + type);
-		self.mapview.setMapType(type);
-	});
+	SmartMap.startCron();
 	return self;
 };
 

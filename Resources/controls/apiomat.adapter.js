@@ -47,7 +47,6 @@ ApiomatAdapter.prototype.loginUser = function() {
 			var ratio = that.user.getRatio();
 			that.user.image = (ratio) ? that.user.getPhotoURL(200, null, null, null, 'png') + '&mtime=' + that.user.data.lastModifiedAt + '.png' : null;
 			that.user.bigimage = (ratio) ? that.user.getPhotoURL(900, null, null, null, 'png') + '&mtime=' + that.user.data.lastModifiedAt + '.png' : null;
-
 			console.log(that.user.image);
 			callbacks.onOk && callbacks.onOk();
 		},
@@ -79,6 +78,8 @@ ApiomatAdapter.prototype.setPosition = function(args) {
 };
 ApiomatAdapter.prototype.getAllRadler = function(_options, _callbacks) {
 	var that = this;
+	console.log(Ti.App.Properties.getList('RADLERLIST'));
+	return;
 	var now = (parseInt(moment().unix()) - 120) * 1000;
 	// letzte 110sec in ms.
 	var query = "createdAt > date(" + now + ") order by createdAt";

@@ -40,7 +40,6 @@ exports.get = function(self) {
 		Ti.App.addEventListener('startrecording', function() {
 			menu.findItem("1").setChecked(true);
 		});
-		console.log('Info: start menue work');
 		if (!Ti.App.Properties.hasProperty('CITY')) {
 			require('ui/city.dialog').create(/*callback */
 			function(_city) {
@@ -71,8 +70,8 @@ exports.get = function(self) {
 					icon : Ti.App.Android.R.drawable.ic_action_twitter,
 					showAsAction : Ti.Android.SHOW_AS_ACTION_IF_ROOM,
 				}).addEventListener("click", function() {
-					self.activeTab = 4;
-					self.tabs[4].getWindow().fireEvent('write!');
+					self.activeTab = 3;
+					self.tabs[3].getWindow().fireEvent('write!');
 				});
 				e.menu.add({
 					title : "Parole aufsprechen",
@@ -98,14 +97,15 @@ exports.get = function(self) {
 					checkable : true,
 					visible : true
 				}).addEventListener("click", function(_e) {
-					console.log('====Standortsenden angeklickt=========');
 					var item = _e.source;
-					console.log(item);
 					if (item.checked == true) {
 						item.setChecked(false);
+						Ti.App.fireEvent('stoprecording');
 						Ti.App.Properties.removeProperty('RECORD');
+						
 					} else {
 						item.setChecked(true);
+						Ti.App.fireEvent('startrecording');
 						Ti.App.Properties.setString('RECORD', 'active');
 					}
 					console.log('RECORD=' + Ti.App.Properties.hasProperty('RECORD'));
