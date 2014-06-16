@@ -60,6 +60,7 @@ SmartMap.prototype = {
 					that.mapview.removeAnnotations(that.annotationviews);
 			},
 			onOk : function(_radlerlist) {
+				console.log(_radlerlist);
 				/* test of disappeared radler */
 				var toremove_viewslist = [], toadd_viewslist = [], count = 0;
 				for (var radlerid in that.annotationrefs) {

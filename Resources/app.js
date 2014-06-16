@@ -28,4 +28,5 @@
 	});
 	require('controls/alarm.manager')();
 	Ti.Android && require('vendor/versionsreminder')();
+	Ti.API.info("AppVersionCode = "+ Ti.Media.Android.appVersionCode + " AppVersionName = " +Ti.Media.Android.appVersionName);
 }();

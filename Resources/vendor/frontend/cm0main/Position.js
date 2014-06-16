@@ -117,6 +117,15 @@ Apiomat.Position.prototype.setPositionLongitude = function(_longitude)
     this.data.position = locArr;
 };
 
+        Apiomat.Position.prototype.getVersion = function() 
+{
+    return this.data.version;
+};
+
+Apiomat.Position.prototype.setVersion = function(_version) {
+    this.data.version = _version;
+};
+
         Apiomat.Position.prototype.getDevice = function() 
 {
     return this.data.device;
@@ -124,6 +133,24 @@ Apiomat.Position.prototype.setPositionLongitude = function(_longitude)
 
 Apiomat.Position.prototype.setDevice = function(_device) {
     this.data.device = _device;
+};
+
+        Apiomat.Position.prototype.getEnabled = function() 
+{
+    return this.data.enabled;
+};
+
+Apiomat.Position.prototype.setEnabled = function(_enabled) {
+    this.data.enabled = _enabled;
+};
+
+        Apiomat.Position.prototype.getApi = function() 
+{
+    return this.data.api;
+};
+
+Apiomat.Position.prototype.setApi = function(_api) {
+    this.data.api = _api;
 };
 
         Apiomat.Position.prototype.getCity = function() 

@@ -1,43 +1,41 @@
-var sendPosition = function(e) {
+var sendPosition = function(_e) {
 	Ti.Geolocation.removeEventListener('location', sendPosition);
-	console.log('Info: new position found => trying to send');
-	Ti.App.Apiomat = new (require('controls/apiomat.adapter'))({
-		ononline : function() {
-			Ti.App.Apiomat.loginUser(null, {
-				onOk : function() {
-					Ti.App.Apiomat.setPosition({
-						latitude : e.coords.latitude,
-				   		longitude : e.coords.longitude
-					});
-				},
-				onError : function(E) {
-					console.log('Error: from APIOMAT ' + E);
-				}
+	console.log(_e.lastGeolocation);
+	var record = Ti.App.Properties.hasProperty('RECORD');
+	if (_e.coords)
+		Ti.App.Apiomat.setPosition({
+			latitude : _e.coords.latitude,
+			longitude : _e.coords.longitude,
+			enabled : (record)? 2 :0
+		});
+	else {
+		try {
+			var coords = JSON.parse(_e.lastGeolocation);
+			Ti.App.Apiomat.setPosition({
+				latitude : _e.coords.latitude,
+				longitude : _e.coords.longitude,
+				enabled : (record)? 1 :0
 			});
-		},
-		onoffline : function() {
-			console.log('Warning: device offline cannot send position');
+		} catch(E) {
 		}
-	});
+	}
+
 };
 
-// sending:
-if (Ti.App.Properties.hasProperty('RECORD') && Ti.Geolocation.locationServicesEnabled) {
-	Ti.Geolocation.accuracy = Ti.Geolocation.ACCURACY_BEST;
-	Ti.Geolocation.distanceFilter = 500;
-	Ti.Geolocation.preferredProvider = Ti.Geolocation.PROVIDER_GPS;
-	Ti.Geolocation.addEventListener('location', sendPosition);
-}
-// receiving
-
-/*
 Ti.App.Apiomat = new (require('controls/apiomat.adapter'))({
 	ononline : function() {
 		Ti.App.Apiomat.loginUser(null, {
 			onOk : function() {
+				if (Ti.Geolocation.locationServicesEnabled) {
+					Ti.Geolocation.accuracy = Ti.Geolocation.ACCURACY_BEST;
+					Ti.Geolocation.distanceFilter = 500;
+					Ti.Geolocation.preferredProvider = Ti.Geolocation.PROVIDER_GPS;
+					Ti.Geolocation.addEventListener('location', sendPosition);
+				}
+
 				var now = (parseInt(require('vendor/moment')().unix()) - 120) * 1000;
 				var query = "createdAt > date(" + now + ") order by createdAt";
-				Apiomat.Position.getPositions(query, {
+				require('vendor/apiomat').Position.getPositions(query, {
 					onOk : function(_positions) {
 						var radlerlist = {};
 						for (var i = 0; i < _positions.length; i++) {
@@ -48,14 +46,9 @@ Ti.App.Apiomat = new (require('controls/apiomat.adapter'))({
 								device : _positions[i].getDevice(),
 							};
 						}
-						Ti.App.Properties.setList('RADLERLIST',radlerlist);
-					},
-					onError : function(error) {
-						console.log('Error: ' + error);
-						
+						Ti.App.Properties.setObject('RADLERLIST', radlerlist);
 					}
 				});
-
 			},
 			onError : function(E) {
 				console.log('Error: from APIOMAT ' + E);
@@ -66,5 +59,3 @@ Ti.App.Apiomat = new (require('controls/apiomat.adapter'))({
 		console.log('Warning: device offline cannot send position');
 	}
 });
-
-*/
