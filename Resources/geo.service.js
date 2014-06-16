@@ -7,7 +7,7 @@ var sendPosition = function(e) {
 				onOk : function() {
 					Ti.App.Apiomat.setPosition({
 						latitude : e.coords.latitude,
-						longitude : e.coords.longitude
+				   		longitude : e.coords.longitude
 					});
 				},
 				onError : function(E) {
