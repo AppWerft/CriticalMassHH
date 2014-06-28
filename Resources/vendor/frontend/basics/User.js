@@ -38,25 +38,47 @@ if(typeof exports === 'undefined')
 }
 (function(Apiomat)
 {
-Apiomat.User = function() {
+Apiomat.User = function(_username, _password) {
     this.data = new Object();
     this.data["dynamicAttributes"] = {};
     
-    this.initDatastoreWithMembersCredentialsIfNeeded = function() {
+    if(typeof _username !== 'undefined')
+    {
+        this.setUserName(_username);
+    }
+    
+    if(typeof _password !== 'undefined')
+    {
+        this.setPassword(_password);
+    }
+    
+    this.initDatastoreIfNeeded = function(allowGuest) {
         //if the datastore is not initialized then do so
-        if(Apiomat.Datastore.getInstance().getUsername() == undefined && Apiomat.Datastore.getInstance().getPassword() == undefined) {
-            if(this.getUserName() != undefined && this.getPassword() != undefined) {
-                Apiomat.Datastore.configure(this);
-            } else {
-                throw new Error("Please set userName and password first for member!");
+        if(Apiomat.Datastore.isInstantiated() === false)
+        {
+            if(typeof this.getUserName() !== 'undefined' &&  typeof this.getPassword() !== 'undefined')
+            {
+                Apiomat.Datastore.configureWithCredentials(this);
+            }
+            else if(this.hasOwnProperty('getSessionToken') && typeof this.getSessionToken() !== 'undefined' && this.getSessionToken())
+            {
+                Apiomat.Datastore.configureWithUserSessionToken(this);
+            }
+            else if (typeof allowGuest !== 'undefined' && allowGuest)
+            {
+                Apiomat.Datastore.configurePlain(Apiomat.User.AOMBASEURL, Apiomat.User.AOMAPIKEY, Apiomat.User.AOMSYS);
+            }
+            else
+            {
+                throw new Error('The Datastore needs to be configured with user credentials or a session token for this method to work.');
             }
         }
     };
     
     /* override save function */
-    this.save = function(_callback) {
-        this.initDatastoreWithMembersCredentialsIfNeeded();
-        Apiomat.AbstractClientDataModel.prototype.save.apply(this, [_callback]);
+    this.save = function(_callback, loadAfterwards) {
+        this.initDatastoreIfNeeded(false);
+        Apiomat.AbstractClientDataModel.prototype.save.apply(this, [_callback, loadAfterwards]);
     };
 
     /* Requests a new password; user will receive an email to confirm*/
@@ -102,13 +124,82 @@ Apiomat.User = function() {
             Apiomat.Datastore.getInstance().updateOnServer(this, internCallback);
         }
     };
+    
+    /**
+     * Request a session token with the credentials saved in this User object.
+     * Optionally sets the attribute of the user and configures the datastore with the session token automatically.
+     * In callback a JS object that maps "SessionToken", "RefreshToken" and "ExpirationDate" (Unix UTC timestamp) to their values will be returned
+     *
+     * @param configure Set flag to false if you don't want the Datastore to automatically be configured with the received session token and also don't want to save the token in the user object
+     * @param callback The callback
+     */
+     this.requestSessionToken = function(configure, callback)
+     {
+        this.requestSessionTokenWithRefreshToken(undefined, configure, callback);
+     };
+     
+     /**
+     * Request a session token with a refresh token. Optionally configures the datastore with the received token and saves it in the user object.
+     *
+     * @param refreshToken The refresh token to use for requesting a new session token
+     * @param configure Set flag to true if you want the Datastore to automatically be configured with the received session token and also save it in the user object.
+     * @param callback The callback
+     */
+     this.requestSessionTokenWithRefreshToken = function(refreshToken, configure, callback)
+     {
+        refreshToken = refreshToken || undefined;
+        this.initDatastoreIfNeeded(refreshToken === 'undefined' ? false : true);
+        var internCB = callback;
+        if (typeof configure !== 'undefined' && configure)
+        {
+            internCB = {
+                onOk : function(result) {
+                    /* Configure Datastore with session token */
+                    var sessionToken = result.SessionToken || '';
+                    if(sessionToken === '')
+                    {
+                        /* return error  if no token is there */
+                        if(typeof callback !== 'undefined' && callback.onError)
+                        {
+                            callback.onError(new Apiomat.ApiomatRequestError(Apiomat.Status.NO_TOKEN_RECEIVED, 200));
+                        }
+                    }
+                    else
+                    {
+                        this.parent.setSessionToken(sessionToken);
+                        Apiomat.Datastore.configureWithUserSessionToken(this.parent);
+                        if(typeof callback !== 'undefined' && callback.onOk)
+                        {
+                            callback.onOk(result);
+                        }
+                    }
+                },
+                onError : function(error) {
+                    if(typeof callback !== 'undefined' && callback.onError)
+                    {
+                        callback.onError(error);
+                    }
+                }
+            };
+            internCB.parent = this;
+        }
+        if(typeof refreshToken === 'undefined')
+        {
+            Apiomat.Datastore.getInstance().requestSessionToken(internCB);
+        }
+        else
+        {
+            Apiomat.Datastore.getInstance().requestSessionToken(internCB);
+        }
+        
+     };
     /* referenced object methods */
 };
 /* static constants */
 Apiomat.User.AOMBASEURL = "https://apiomat.org/yambas/rest/apps/CM0";
 Apiomat.User.AOMAPIKEY = "4701084103546717092";
 Apiomat.User.AOMSYS = "LIVE";
-Apiomat.User.AOMSDKVERSION = "1.12-119";
+Apiomat.User.AOMSDKVERSION = "1.13-133";
 /* static methods */
 
 /**
@@ -132,7 +223,7 @@ Apiomat.User.prototype.constructor = Apiomat.User;
 * Be sure that userName and password is set
 */
 Apiomat.User.prototype.loadMe = function(callback) {
-    this.initDatastoreWithMembersCredentialsIfNeeded();
+    this.initDatastoreIfNeeded(false);
     Apiomat.Datastore.getInstance().loadFromServer("models/me", callback, this);
 };
 
@@ -202,6 +293,27 @@ Apiomat.User.prototype.setRegistrationId = function(_registrationId) {
     this.data.dynamicAttributes["registrationId"] = _registrationId;
 };
 
+        Apiomat.User.prototype.getSessionToken = function() 
+{
+    return this.data.sessionToken;
+};
+
+Apiomat.User.prototype.setSessionToken = function(_sessionToken) {
+    this.data.sessionToken = _sessionToken;
+};
+
+        Apiomat.User.prototype.getRefreshToken = function() 
+{
+    return this.data.refreshToken;
+};
+
+
+    Apiomat.User.prototype.getSessionTokenExpirationDate = function() 
+{
+    var retDate = this.data.sessionTokenExpirationDate;
+    return (typeof retDate != 'undefined')? new Date(retDate) : undefined;
+};
+    
    Apiomat.User.prototype.getLocLatitude = function() 
 {
     var locArr = this.data.loc;
@@ -256,5 +368,7 @@ Apiomat.User.prototype.setLocLongitude = function(_longitude)
 Apiomat.User.prototype.setDeviceToken = function(_deviceToken) {
     this.data.dynamicAttributes["deviceToken"] = _deviceToken;
 };
+
+
 })(typeof exports === 'undefined' ? Apiomat
         : exports);

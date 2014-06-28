@@ -60,7 +60,6 @@ SmartMap.prototype = {
 					that.mapview.removeAnnotations(that.annotationviews);
 			},
 			onOk : function(_radlerlist) {
-				console.log(_radlerlist);
 				/* test of disappeared radler */
 				var toremove_viewslist = [], toadd_viewslist = [], count = 0;
 				for (var radlerid in that.annotationrefs) {
@@ -80,7 +79,7 @@ SmartMap.prototype = {
 						var annotation = Ti.Map.createAnnotation({
 							latitude : _radlerlist[radlerid].latitude,
 							longitude : _radlerlist[radlerid].longitude,
-							itemId : radlerid,
+							itemId : radlerid,title:_radlerlist[radlerid].device,
 							image : '/assets/' + Ti.Platform.displayCaps.density + '.png',
 						});
 						toadd_viewslist.push(annotation);
@@ -125,7 +124,7 @@ SmartMap.prototype = {
 	},
 	startCron : function() {
 		var that = this;
-
+		that.updateAnnotations.call(that, {});
 		this.cron = setInterval(function() {
 			that.updateAnnotations.call(that, {});
 		}, 30000);

@@ -3,14 +3,14 @@ module.exports = function() {
 		require('controls/georecord.dialog').create();
 		var alarmModule = require('bencoding.alarmmanager');
 		var alarmManager = alarmModule.createAlarmManager();
+		alarmManager.cancelAlarmService();
 		alarmManager.addAlarmService({
 			service : 'de.appwerft.cm.Geo_serviceService',
-			minute : 1,
+			minute : 1, // until 1 minute it starts
 			requestCode : 41,
-			second : 0,
-			forceRestart : true,
-			interval : 60000
+			forceRestart : false,
+			interval : 50000
 		});
-		Ti.App.Properties.setBool("service_running", true);
+		Ti.App.Properties.setBool("SERVICERUNNING", true);
 	}
 };

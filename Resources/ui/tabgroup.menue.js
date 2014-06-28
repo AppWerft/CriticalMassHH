@@ -21,9 +21,7 @@ exports.get = function(self) {
 						alert : 'Ein Radler mit einem ' + Ti.Platform.getModel() + ' hat sich zur CM angemeldet',
 						title : 'CM hat einen neuen Mitmacher.',
 						badget : '+1',
-						sound : 'klingel',
-						icon : 'ic_pn_newuser',
-						vibrate : true
+						icon : 'ic_pn_newuser'
 					}, function(_e) {
 					});
 					Ti.App.CloudPush.subscribeChannel('alert', function(_e) {

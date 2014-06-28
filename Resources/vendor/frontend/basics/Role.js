@@ -88,5 +88,7 @@ Apiomat.Role.prototype.setName = function(_name) {
 Apiomat.Role.prototype.setMembers = function(_members) {
     this.data.members = _members;
 };
+
+
 })(typeof exports === 'undefined' ? Apiomat
         : exports);

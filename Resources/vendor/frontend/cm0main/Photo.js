@@ -279,5 +279,7 @@ Apiomat.Photo.prototype.setTitle = function(_title) {
 Apiomat.Photo.prototype.setCity = function(_city) {
     this.data.city = _city;
 };
+
+
 })(typeof exports === 'undefined' ? Apiomat
         : exports);

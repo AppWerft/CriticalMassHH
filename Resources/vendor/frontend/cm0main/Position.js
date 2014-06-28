@@ -71,6 +71,15 @@ Apiomat.Position.prototype.getModuleName = function() {
 
 /* easy getter and setter */
 
+        Apiomat.Position.prototype.getUserid = function() 
+{
+    return this.data.userid;
+};
+
+Apiomat.Position.prototype.setUserid = function(_userid) {
+    this.data.userid = _userid;
+};
+
    Apiomat.Position.prototype.getPositionLatitude = function() 
 {
     var locArr = this.data.position;
@@ -126,6 +135,15 @@ Apiomat.Position.prototype.setVersion = function(_version) {
     this.data.version = _version;
 };
 
+        Apiomat.Position.prototype.getEnabled = function() 
+{
+    return this.data.enabled;
+};
+
+Apiomat.Position.prototype.setEnabled = function(_enabled) {
+    this.data.enabled = _enabled;
+};
+
         Apiomat.Position.prototype.getDevice = function() 
 {
     return this.data.device;
@@ -135,13 +153,13 @@ Apiomat.Position.prototype.setDevice = function(_device) {
     this.data.device = _device;
 };
 
-        Apiomat.Position.prototype.getEnabled = function() 
+        Apiomat.Position.prototype.getCity = function() 
 {
-    return this.data.enabled;
+    return this.data.city;
 };
 
-Apiomat.Position.prototype.setEnabled = function(_enabled) {
-    this.data.enabled = _enabled;
+Apiomat.Position.prototype.setCity = function(_city) {
+    this.data.city = _city;
 };
 
         Apiomat.Position.prototype.getApi = function() 
@@ -153,13 +171,6 @@ Apiomat.Position.prototype.setApi = function(_api) {
     this.data.api = _api;
 };
 
-        Apiomat.Position.prototype.getCity = function() 
-{
-    return this.data.city;
-};
 
-Apiomat.Position.prototype.setCity = function(_city) {
-    this.data.city = _city;
-};
 })(typeof exports === 'undefined' ? Apiomat
         : exports);

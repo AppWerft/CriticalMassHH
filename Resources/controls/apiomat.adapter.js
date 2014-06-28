@@ -14,6 +14,7 @@ var saveCB = {
 ///////////////////////////////////////
 var ApiomatAdapter = function() {
 	var callbacks = arguments[0] || {};
+	this.userid = Ti.Utils.md5HexDigest(Ti.Platform.getMacaddress()).substring(0, 7);
 	this.user = {};
 	// test if online:
 	var xhr = Ti.Network.createHTTPClient({
@@ -67,14 +68,17 @@ ApiomatAdapter.prototype.setPosition = function(args) {
 	myNewPosition.setPositionLatitude(args.latitude);
 	myNewPosition.setPositionLongitude(args.longitude);
 	myNewPosition.setDevice(Ti.Platform.model);
+	myNewPosition.setUserid(that.userid);
 	myNewPosition.setApi(Ti.Platform.Android.API_LEVEL);
 	myNewPosition.setVersion(Ti.App.version);
 	myNewPosition.setEnabled(args.enabled);
 	myNewPosition.save({
-		onOK : function() {
-			console.log('Info: position successful saved ' + myNewPosition);
+		onOk : function() {
+			console.log('Info: new position (from alarm process) successful saved ' + myNewPosition);
 		},
 		onError : function() {
+			console.log('Error: cannot save new position (from alarm process) ' + E);
+	
 		}
 	});
 
@@ -83,9 +87,9 @@ ApiomatAdapter.prototype.getAllRadler = function(_options, _callbacks) {
 	var radler = Ti.App.Properties.getObject('RADLERLIST');
 	var devices = [];
 	for (var i in radler){
-			devices.push(radler[i].device);
+		devices.push(radler[i].device);
 	}
-	console.log(devices.join(' == '));
+	console.log(devices.join(' | '));
 	_callbacks.onOk(radler);
 };
 

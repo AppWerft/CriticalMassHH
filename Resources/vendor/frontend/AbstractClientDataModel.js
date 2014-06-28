@@ -147,7 +147,8 @@ Apiomat.AbstractClientDataModel.prototype = {
 				callback, this);
 	},
 
-	save : function(_callback) {
+	save : function(_callback, loadAfterwards) {
+		loadAfterwards = (typeof loadAfterwards !== "undefined" && loadAfterwards.constructor === Boolean) ? loadAfterwards : true;
 		var internCallback = {
 			onOk : function(href) {
 				/* load again */
@@ -156,8 +157,8 @@ Apiomat.AbstractClientDataModel.prototype = {
 				}
 				this.parent.setOffline(this.wasLocalSave || false);
 				
-				/* if this was a offline request don't load again */
-				if(!this.wasLocalSave)
+				/* if this was an offline request don't load again */
+				if(!this.wasLocalSave && loadAfterwards)
 				{
 					this.parent.load({
 						onOk : function() {

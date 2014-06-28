@@ -111,6 +111,7 @@ Apiomat.Status = {
     UNAUTHORIZED: 840,
     WRONG_APIKEY: 841,
     EVALANCHE_UNAUTH: 842,
+    PW_CHANGE_W_TOKEN: 843,
     CRUD_ERROR: 901,
     IMEXPORT_ERROR: 902,
     COMPILE_ERROR: 903,
@@ -120,12 +121,15 @@ Apiomat.Status = {
     PUSH_INIT_FAILED: 907,
     FACEBOOK_ERROR: 908,
     FACEBOOK_OAUTH_ERROR: 910,
+    FACEBOOK_OAUTH_ERROR2: 917,
     MEMBER_NOT_FOUND: 911,
     WORDPRESS_FETCH_DATA_ERROR: 912,
     TUMBLR_OAUTH_ERROR: 913,
     TUMBLR_ERROR: 914,
     EXECUTE_METHOD_ERROR_PRIMITIVE: 915,
     EXECUTE_METHOD_ERROR: 916,
+    OAUTH_TOKEN_REQUEST_ERROR: 918,
+    FINDING_RESOURCE_ERROR: 919,
     HREF_NOT_FOUND: 601,
     WRONG_URI_SYNTAX: 602,
     WRONG_CLIENT_PROTOCOL: 603,
@@ -137,6 +141,8 @@ Apiomat.Status = {
     TOO_MANY_LOCALIDS: 6089,
     MAX_CACHE_SIZE_REACHED: 6090,
     CANT_WRITE_IN_CACHE: 6091,
+    BAD_DATASTORE_CONFIG: 610,
+    NO_TOKEN_RECEIVED: 611,
     MALICIOUS_MEMBER: 950,
 
 
@@ -365,6 +371,9 @@ getReasonPhrase : function(statusCode) {
     case Apiomat.Status.EVALANCHE_UNAUTH:
         phrase = "Authorization failed! Maybe username/password was not set for evelanche configuration?";
         break;
+    case Apiomat.Status.PW_CHANGE_W_TOKEN:
+        phrase = "Not authorized to change a user's password when authenticating with a token.";
+        break;
     case Apiomat.Status.CRUD_ERROR:
         phrase = "Internal error during CRUD operation";
         break;
@@ -387,10 +396,13 @@ getReasonPhrase : function(statusCode) {
         phrase = "Failed to initialize push service!";
         break;
     case Apiomat.Status.FACEBOOK_ERROR:
-        phrase = "Error communicationg with facebook!";
+        phrase = "An error occured while communicating with facebook!";
         break;
     case Apiomat.Status.FACEBOOK_OAUTH_ERROR:
         phrase = "facebook throws oAuth error! Please show login dialog again";
+        break;
+    case Apiomat.Status.FACEBOOK_OAUTH_ERROR2:
+        phrase = "Received OAuth2 error from Facebook";
         break;
     case Apiomat.Status.MEMBER_NOT_FOUND:
         phrase = "Can't find member with this id/username";
@@ -409,6 +421,12 @@ getReasonPhrase : function(statusCode) {
         break;
     case Apiomat.Status.EXECUTE_METHOD_ERROR:
         phrase = "Execute method fails";
+        break;
+    case Apiomat.Status.OAUTH_TOKEN_REQUEST_ERROR:
+        phrase = "An error occured during requesting an apiOmat OAuth2 token";
+        break;
+    case Apiomat.Status.FINDING_RESOURCE_ERROR:
+        phrase = "An error occured while trying to find the resource";
         break;
     case Apiomat.Status.HREF_NOT_FOUND:
         phrase = "Model has no HREF; please save it first!";
@@ -442,6 +460,12 @@ getReasonPhrase : function(statusCode) {
         break;
     case Apiomat.Status.CANT_WRITE_IN_CACHE:
         phrase = "Can't persist data to cache.";
+        break;
+    case Apiomat.Status.BAD_DATASTORE_CONFIG:
+        phrase = "For requesting a session token without a refresh token, the Datastore must be configured with a username and password";
+        break;
+    case Apiomat.Status.NO_TOKEN_RECEIVED:
+        phrase = "The response didn't contain a token";
         break;
     case Apiomat.Status.MALICIOUS_MEMBER:
         phrase = "Malicious use of member detected!";
@@ -677,6 +701,9 @@ getStatusForCode : function(httpCode) {
     case 842:
         statusCode = Apiomat.Status.EVALANCHE_UNAUTH;
         break;
+    case 843:
+        statusCode = Apiomat.Status.PW_CHANGE_W_TOKEN;
+        break;
     case 901:
         statusCode = Apiomat.Status.CRUD_ERROR;
         break;
@@ -704,6 +731,9 @@ getStatusForCode : function(httpCode) {
     case 910:
         statusCode = Apiomat.Status.FACEBOOK_OAUTH_ERROR;
         break;
+    case 917:
+        statusCode = Apiomat.Status.FACEBOOK_OAUTH_ERROR2;
+        break;
     case 911:
         statusCode = Apiomat.Status.MEMBER_NOT_FOUND;
         break;
@@ -721,6 +751,12 @@ getStatusForCode : function(httpCode) {
         break;
     case 916:
         statusCode = Apiomat.Status.EXECUTE_METHOD_ERROR;
+        break;
+    case 918:
+        statusCode = Apiomat.Status.OAUTH_TOKEN_REQUEST_ERROR;
+        break;
+    case 919:
+        statusCode = Apiomat.Status.FINDING_RESOURCE_ERROR;
         break;
     case 601:
         statusCode = Apiomat.Status.HREF_NOT_FOUND;
@@ -754,6 +790,12 @@ getStatusForCode : function(httpCode) {
         break;
     case 6091:
         statusCode = Apiomat.Status.CANT_WRITE_IN_CACHE;
+        break;
+    case 610:
+        statusCode = Apiomat.Status.BAD_DATASTORE_CONFIG;
+        break;
+    case 611:
+        statusCode = Apiomat.Status.NO_TOKEN_RECEIVED;
         break;
     case 950:
         statusCode = Apiomat.Status.MALICIOUS_MEMBER;

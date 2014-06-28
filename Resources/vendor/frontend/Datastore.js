@@ -47,6 +47,22 @@ Apiomat.AOMOfflineStrategy = {
 	"USE_OFFLINE_CACHE" : 1,
 };
 
+Apiomat.AOMAuthType = {
+	/**
+	 * Configuration without credentials.
+	 */
+	GUEST : 0,
+	/**
+	 * Configuration with username and password
+	 */
+	USERNAME_PASSWORD : 1,
+	/**
+	 * Configuration with an OAuth2 token
+	 */
+	OAUTH2_TOKEN : 2
+	
+};
+
 Apiomat.Datastore = (function()
 {
 	var instantiated;
@@ -59,6 +75,8 @@ Apiomat.Datastore = (function()
 	var _useASync = true;
 	var _offlineStrategy = Apiomat.AOMOfflineStrategy.NO_OFFLINE_HANDLING;
 	var _offlineHandler = undefined;
+	var _authType = Apiomat.AOMAuthType.GUEST;
+	var _sessionToken;
 
 	/* is safari browser */
 	var is_safari = typeof navigator === 'object'
@@ -74,6 +92,33 @@ Apiomat.Datastore = (function()
 	 * send always seconds instead of ms
 	 */
 	var lastModified = new Array();
+	
+	/**
+	 * Configure Datastore instance with given credentials
+	 */
+	function configure(baseURL, apiKey, system, version, username, password, sessionToken)
+	{
+		_baseURL = baseURL;
+		_apiKey = apiKey;
+		_system = system;
+		_version = version;
+		_username = username;
+		_password = password;
+		_sessionToken = sessionToken;
+		/* set authType */
+		if(typeof _sessionToken !== 'undefined')
+		{
+			_authType = Apiomat.AOMAuthType.OAUTH2_TOKEN;
+		}
+		else if(typeof _username !== 'undefined' && typeof _password !== 'undefined')
+		{
+			_authType = Apiomat.AOMAuthType.USERNAME_PASSWORD;
+		}
+		else
+		{
+			_authType = Apiomat.AOMAuthType.GUEST;
+		}
+	}
 
 	function init()
 	{
@@ -88,6 +133,11 @@ Apiomat.Datastore = (function()
 			getPassword : function()
 			{
 				return _password;
+			},
+			
+			getAuthType : function()
+			{
+				return _authType;
 			},
 
 			setUseAsnycRequests : function(_asyncReq)
@@ -274,6 +324,61 @@ Apiomat.Datastore = (function()
 				this.getOfflineHandler().addTask(_httpMethod, _href, _content,
 						_param, successFunc, errorFunc);
 			},
+			
+			/**
+			 * Returns the session token for the user that this Datastore has been configured
+			 * 
+			 * @param callback methods which will called after request is finished
+			 * @return the session token for the user that this Datastore has been configured
+			 */
+			requestSessionToken : function( callback )
+			{
+				if (_authType !== Apiomat.AOMAuthType.USERNAME_PASSWORD)
+				{
+					var error = new Apiomat.ApiomatRequestError(Apiomat.Status.BAD_DATASTORE_CONFIG);
+					if (typeof _callback !== 'undefined' && _callback.onError)
+					{
+						_callback.onError(error);
+					}
+					else if (typeof console !== 'undefined' && console.error)
+					{
+						console.error("Error occured: " + error);
+					}
+				}
+				else
+				{
+					var appName = _baseURL.substring( _baseURL.lastIndexOf( '/' ) + 1 );
+					var params = {
+						'grant_type' : 'aom_user',
+						'client_id' : appName,
+						'scope' : 'read,write',
+						'username' : _username,
+						'password' : _password,
+						'app' : appName,
+						'system' : _system
+					};
+					_requestSessionToken(params, callback);
+				}
+			},
+			
+			/**
+			 * Returns a new session token for the provided refresh token
+			 * 
+			 * @param refreshToken The refresh token to use for requesting a new session token
+			 * @param callback methods which will called after request is finished
+			 * @return a new session token for the provided refresh token
+			 */
+			requestSessionTokenWithRefreshToken : function( refreshToken, callback  )
+			{
+				var appName = _baseURL.substring( _baseURL.lastIndexOf( '/' ) + 1 );
+				var params = {
+					'grant_type' : 'refresh_token',
+					'client_id' : appName,
+					'scope' : 'read,write',
+					'refresh_token' : refreshToken
+				};
+				_requestSessionToken(params, callback);
+			},
 		};
 	}
 
@@ -318,6 +423,61 @@ Apiomat.Datastore = (function()
 			}
 		}
 	}
+	
+	/**
+	 * Returns the session token for either the user that this Datastore has been configured with or the refresh token
+	 * 
+	 * @param _params A list of NameValuePairs to build the url encoded form parameters
+	 * @param _callback the callback method
+	 * @return the session token for either the user that this Datastore has been configured with or the refresh token
+	 */
+	function _requestSessionToken( _params, _callback )
+	{
+		var url = _baseURL.substring(0, _baseURL.indexOf( 'yambas' ) + 6 ) + '/oauth/token';
+		/* convert _params to key=value&key=value2.. */
+		var data = '';
+		for(prop in _params)
+		{
+			if(data !== '')
+			{
+				data += '&';
+			}
+			data += prop + '=' + _params[prop];
+		}
+		_sendRequest('POST', url,[ 200 ], {
+			onOk: function(retData) {
+				var result = {};
+				console.info("SessionRequestResult: " + result);
+				var jsonRet = JSON.parse(retData) || {};
+				result.SessionToken = jsonRet.access_token;
+				result.RefreshToken = jsonRet.refresh_token;
+				var expirein = jsonRet.expires_in || 0;
+				result.ExpirationDate = new Date().getTime() + expirein;
+				if(typeof _callback !== 'undefined' && _callback.onOk)
+				{
+					_callback.onOk(result);
+				}
+			},
+			onError: function(error) {
+				var e = new Apiomat.ApiomatRequestError(error.statusCode, 200, 'Requesting the session token failed');
+				if(typeof _callback !== 'undefined' && _callback.onError)
+				{
+					_callback.onError(e);
+				}
+				else if (console && console.error)
+				{
+					console.error("Error occured: " + e);
+				}
+			}
+		}, undefined, {
+			'data' : data,
+			'returnpost' : true,
+			'headerDetails' : {
+					'authHeader' : false,
+					'contentType' : 'application/x-www-form-urlencoded'
+				},
+		});
+	}
 
 	/**
 	 * private method to send request to apiOmat backend
@@ -343,53 +503,50 @@ Apiomat.Datastore = (function()
 	function _sendRequest(_httpMethod, _url, _expectedReturnCodes, _callback,
 			clazz, _args)
 	{
-		var isByteData = false;
-		var data = undefined;
-		if (_args)
-		{
-			data = _args.data; // could be query on GET or (json) data on
-			// POST/PUT
-			isByteData = _args.isByteData;
-		}
+		_args = _args || {};
+		var data = _args.data || undefined; // could be query on GET or (json) data on POST/PUT
+		var isByteData = _args.isByteData || false;
+		var returnpost = _args.returnpost || false;
+		var headerDetails = _args.headerDetails || {};
+		
 		var http;
 		// Code for titanium
 		if (is_titanium)
 		{
 			Ti.API.log("Use HTTP client of titanium");
-				http = Ti.Network
-						.createHTTPClient({
-							// function called when the response data is
-							// available
-							onload : function(e)
-							{
-								_processResponse(this, _expectedReturnCodes, _callback, _httpMethod, clazz);
-							},
-							// function called when an error occurs, including a
-							// timeout
-							onerror : function(e)
-							{
-								if (_expectedReturnCodes
-												.indexOf(this.status) > -1)
-								{
-									throw e;
-								}
-								else
-								{
-									var error = new Apiomat.ApiomatRequestError(
-											this.status, _expectedReturnCodes,
-											this.responseText);
-									if (typeof _callback !== 'undefined'
-											&& _callback.onError)
-									{
-										_callback.onError(error);
-									} else
-									{
-										Ti.API.error("Received HTTP error: "
-												+ error);
-									}
-								}
-							}
-						});
+			http = Ti.Network.createHTTPClient({
+				// function called when the response data is
+				// available
+				onload : function(e)
+				{
+					_processResponse(this, _expectedReturnCodes, _callback, _httpMethod, clazz, returnpost);
+				},
+				// function called when an error occurs, including a
+				// timeout
+				onerror : function(e)
+				{
+					if (_expectedReturnCodes
+									.indexOf(this.status) > -1)
+					{
+						throw e;
+					}
+					else
+					{
+						var error = new Apiomat.ApiomatRequestError(
+								this.status, _expectedReturnCodes,
+								this.responseText);
+						if (typeof _callback !== 'undefined'
+								&& _callback.onError)
+						{
+							_callback.onError(error);
+						} else
+						{
+							Ti.API.error("Received HTTP error: "
+									+ error);
+						}
+					}
+				}
+			});
 		}
 		// code for IE7+, Firefox, Chrome, Opera, Safari
 		else if (typeof window === 'object' && window.XMLHttpRequest)
@@ -415,7 +572,7 @@ Apiomat.Datastore = (function()
 		_url = _createHref(_url);
 
 		http.open(_httpMethod, _url, _useASync);
-		_setHeader(_url, _httpMethod, http, isByteData);
+		_setHeader(_url, _httpMethod, http, isByteData, headerDetails);
 		if (isByteData && _httpMethod === "GET")
 		{
 			http.overrideMimeType('text/plain; charset=x-user-defined');
@@ -427,7 +584,7 @@ Apiomat.Datastore = (function()
 			{
 				if (http.readyState == 4)
 				{
-					_processResponse(http, _expectedReturnCodes, _callback, _httpMethod, clazz);
+					_processResponse(http, _expectedReturnCodes, _callback, _httpMethod, clazz, returnpost);
 				}
 			};
 		}
@@ -454,7 +611,7 @@ Apiomat.Datastore = (function()
 		}
 	}
 	
-	function _processResponse(http, _expectedReturnCodes, _callback, _httpMethod, clazz)
+	function _processResponse(http, _expectedReturnCodes, _callback, _httpMethod, clazz, returnpost)
 	{
 		var errorOccured = false;
 		try
@@ -462,7 +619,7 @@ Apiomat.Datastore = (function()
 			/* check if status code in expected ones */
 			if (_expectedReturnCodes.indexOf(http.status) > -1)
 			{
-				if (_callback && _callback.onOk)
+				if (_callback && _callback.hasOwnProperty('onOk'))
 				{
 					/* save lastModified for url if safari */
 					if (is_safari && _httpMethod === "GET")
@@ -476,7 +633,7 @@ Apiomat.Datastore = (function()
 							&& typeof clazz !== 'undefined')
 					{
 						/* check if array */
-						var json = JSON.parse(http.responseText);
+						var json = JSON.parse(elem);
 						if (json instanceof Array)
 						{
 							elem = [];
@@ -492,13 +649,12 @@ Apiomat.Datastore = (function()
 							elem.fromJson(json);
 						}
 					}
-					var returnedHref;
-					if (_httpMethod === "POST")
+					var returnedHref = undefined;
+					if (_httpMethod === "POST" && returnpost === false)
 					{
-						returnedHref = http
-								.getResponseHeader("Location");
+						returnedHref = http.getResponseHeader("Location");
 					}
-					_callback.onOk(_httpMethod === "GET" ? elem
+					_callback.onOk(_httpMethod === "GET" || returnpost ? elem
 							: returnedHref || undefined);
 				}
 			} else
@@ -542,12 +698,16 @@ Apiomat.Datastore = (function()
 			}
 		}
 	}
-
-	function _setHeader(_url, _httpMethod, http, _isByteData)
+	
+	function _setHeader(_url, _httpMethod, http, _isByteData, headerDetails)
 	{
 		http.setRequestHeader("X-apiomat-system", _system);
 		http.setRequestHeader("X-apiomat-apikey", _apiKey);
-		if (typeof _isByteData !== 'undefined' && _isByteData)
+		if(headerDetails.contentType)
+		{
+			http.setRequestHeader("Content-Type", headerDetails.contentType);
+		}
+		else if (typeof _isByteData !== 'undefined' && _isByteData)
 		{
 			http.setRequestHeader("Content-Type", "application/octet-stream");
 		}
@@ -557,7 +717,12 @@ Apiomat.Datastore = (function()
 			http.setRequestHeader("Accept", "application/json");
 		}
 		http.setRequestHeader("X-apiomat-fullupdate", "true");
-		if (_username && _password)
+		/* Set correct Auth header depending on AuthType */
+		if(headerDetails.hasOwnProperty('authHeader') && headerDetails.authHeader == false)
+		{
+			/* dont set auth header if not wanted */
+		}
+		else if (_authType === Apiomat.AOMAuthType.USERNAME_PASSWORD)
 		{
 			var creds = _username + ":" + _password;
 			if(is_nodejs)
@@ -586,6 +751,11 @@ Apiomat.Datastore = (function()
 			http.setRequestHeader("Authorization", "Basic "
 					+ creds);
 		}
+		else if(_authType === Apiomat.AOMAuthType.OAUTH2_TOKEN)
+		{
+			http.setRequestHeader("Authorization", 'Bearer ' + _sessionToken);
+		}
+		
 		http.setRequestHeader("X-apiomat-sdkVersion", _version);
 		/*
 		 * send saved lastModified for safari browser (cause safari uses seconds
@@ -656,21 +826,40 @@ Apiomat.Datastore = (function()
 			}
 			return instantiated;
 		},
+		
+		isInstantiated : function()
+		{
+			return typeof instantiated !== 'undefined' && instantiated;
+		},
+		/*
+		 * @Deprecated
+		 */
 		configure : function(user)
 		{
-			_username = user.getUserName();
-			_password = user.getPassword();
-			this.configurePlain(Apiomat.User.AOMBASEURL,
-					Apiomat.User.AOMAPIKEY, Apiomat.User.AOMSYS,
-					Apiomat.User.AOMSDKVERSION);
+			this.configureWithCredentials(user);
 		},
-
+		configureWithCredentials : function(user)
+		{
+			configure(Apiomat.User.AOMBASEURL, Apiomat.User.AOMAPIKEY, Apiomat.User.AOMSYS, Apiomat.User.AOMSDKVERSION, user.getUserName(), user.getPassword()); 
+		},
+		configureAsGuest : function(baseURL, apiKey, system, version) 
+		{
+			configure(baseURL, apiKey, system, version); 
+		},
+		configureWithUserSessionToken : function(user)
+		{
+			this.configureWithSessionToken(user.getSessionToken());
+		},
+		configureWithSessionToken: function(sessionToken)
+		{
+			configure(Apiomat.User.AOMBASEURL, Apiomat.User.AOMAPIKEY, Apiomat.User.AOMSYS, Apiomat.User.AOMSDKVERSION, undefined, undefined, sessionToken);
+		},
+		/*
+		 * @Deprecated
+		 */
 		configurePlain : function(baseURL, apiKey, system, version)
 		{
-			_baseURL = baseURL;
-			_apiKey = apiKey;
-			_system = system;
-			_version = version;
+			this.configureAsGuest(baseURL, apiKey, system, version);
 		},
 
 		/**

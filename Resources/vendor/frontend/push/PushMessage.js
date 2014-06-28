@@ -94,9 +94,6 @@ Apiomat.PushMessage.prototype.setScheduleTimestamp = function(_scheduleTimestamp
     return this.data.successCount;
 };
 
-Apiomat.PushMessage.prototype.setSuccessCount = function(_successCount) {
-    this.data.successCount = _successCount;
-};
 
         Apiomat.PushMessage.prototype.getPayload = function() 
 {
@@ -270,9 +267,6 @@ Apiomat.PushMessage.prototype.setBadge = function(_badge) {
     return this.data.failureCount;
 };
 
-Apiomat.PushMessage.prototype.setFailureCount = function(_failureCount) {
-    this.data.failureCount = _failureCount;
-};
 
     /**
  * Returns an URL of the image. <br/> You can provide several optional parameters to
@@ -415,9 +409,6 @@ Apiomat.PushMessage.prototype.deleteImage = function(_callback)
     return this.data.failureReasons;
 };
 
-Apiomat.PushMessage.prototype.setFailureReasons = function(_failureReasons) {
-    this.data.failureReasons = _failureReasons;
-};
 
         Apiomat.PushMessage.prototype.getSoundName = function() 
 {
@@ -440,5 +431,7 @@ Apiomat.PushMessage.prototype.send = function(callback) {
     }
     Apiomat.Datastore.getInstance().updateOnServerWithJSON(this.getHref()+"/method/send",JSON.stringify(dataArr),callback);
 };
+
+
 })(typeof exports === 'undefined' ? Apiomat
         : exports);

@@ -68,7 +68,7 @@ CP.prototype = {
 	push2channel : function(_channel, _payload, _callback) {
 		_payload.uid = this.userid;
 		Cloud.PushNotifications.notify({
-			channel : Ti.App.Properties.getString('CITY', '') + _channel,
+			channel : Ti.App.Properties.getString('CITY', 'Hamburg') + _channel,
 			friends : true,
 			"to_ids" : "everyone",
 			payload : _payload
