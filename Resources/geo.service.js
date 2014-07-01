@@ -40,15 +40,19 @@ Ti.App.Apiomat = new (require('controls/apiomat.adapter'))({
 				require('vendor/apiomat').Position.getPositions(query, {
 					onOk : function(_positions) {
 						var radlerlist = {};
-						console.log('Positions fresh from cloud: '+_positions.length );
+						console.log('Positions fresh from cloud: ' + _positions.length);
 						for (var i = 0; i < _positions.length; i++) {
-							try {var user = _positions[i].getUserid();
-							console.log(user);
-							radlerlist[user] = {
-								latitude : _positions[i].getPositionLatitude(),
-								longitude : _positions[i].getPositionLongitude(),
-								device : _positions[i].getDevice(),
-							};} catch(E) {console.log(E);} 
+							try {
+								var user = _positions[i].getUserid() || _positions[i].data.id;
+								console.log(user);
+								radlerlist[user] = {
+									latitude : _positions[i].getPositionLatitude(),
+									longitude : _positions[i].getPositionLongitude(),
+									device : _positions[i].getDevice(),
+								};
+							} catch(E) {
+								console.log(E);
+							}
 						}
 						Ti.App.Properties.setObject('RADLERLIST', radlerlist);
 					}

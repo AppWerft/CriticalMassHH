@@ -50,8 +50,11 @@ SmartMap.prototype = {
 		}
 		var that = this;
 		that.mapview && that.mapview.fireEvent('start');
-		Ti.App.Apiomat.getAllRadler(null, {
+		Ti.App.Apiomat && Ti.App.Apiomat.getAllRadler(null, {
+
 			onError : function() {
+				if (!that.mapview)
+					return;
 				console.log('Error: adapter.getallradler() sends error');
 				that.mapview && that.mapview.fireEvent('changed', {
 					text : 'Derweil keine neuen Radlerdaten. Probleme mit der Wolkenkommunikation'
@@ -60,6 +63,8 @@ SmartMap.prototype = {
 					that.mapview.removeAnnotations(that.annotationviews);
 			},
 			onOk : function(_radlerlist) {
+				if (!that.mapview)
+					return;
 				/* test of disappeared radler */
 				var toremove_viewslist = [], toadd_viewslist = [], count = 0;
 				for (var radlerid in that.annotationrefs) {
@@ -79,7 +84,8 @@ SmartMap.prototype = {
 						var annotation = Ti.Map.createAnnotation({
 							latitude : _radlerlist[radlerid].latitude,
 							longitude : _radlerlist[radlerid].longitude,
-							itemId : radlerid,title:_radlerlist[radlerid].device,
+							itemId : radlerid,
+							title : _radlerlist[radlerid].device,
 							image : '/assets/' + Ti.Platform.displayCaps.density + '.png',
 						});
 						toadd_viewslist.push(annotation);

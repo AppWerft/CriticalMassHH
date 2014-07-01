@@ -1,13 +1,13 @@
-Ti.Map = require('ti.map');
-
+var CriticalMap = require('ti.map');
+// ![alt text](http://i.imgur.com/jtn7zzE.png)
 exports.create = function() {
 	var options = arguments[0] || {};
 	var meetingpoint = null;
 	var ready = false;
 	var annotations = [];
-	var SmartMap = new (require('ui/smartmap.widget'))();
-	var self = require('vendor/window').create({
-	});
+
+	var self = require('vendor/window').create();
+	self.modal = false;
 	var radlertext = Ti.UI.createLabel({
 		color : 'white',
 		height : 20,
@@ -22,27 +22,25 @@ exports.create = function() {
 	self.backgroundColor = 'black';
 	self.add(radlertext);
 	var mapoptions = {
-		mapType : Ti.Map.NORMAL_TYPE,
+		mapType : CriticalMap.NORMAL_TYPE,
 		bottom : 20,
 		enableZoomControls : false,
-		animate : true,
-		regionFit : false,
+		animate : false,
+		regionFit : true,
 		traffic : true,
-		userLocation : Ti.App.Properties.hasProperty('RECORD')?true:false
+		zoomEnabled : true,
+		userLocation : Ti.App.Properties.hasProperty('RECORD') ? true : false,
+		enableZoomControls : false,
+		animate : true,
 	};
-	self.mapview = SmartMap.getView(mapoptions);
-	self.mapview.addEventListener('complete', function() {
-		require('vendor/address2region')(Ti.App.Properties.getString('CITY', 'Hamburg'), function(_region) {
-			self.mapview.setLocation(_region);
-		});
-	});
+
 	self.updatemeetingpointannotation = function(_payload) {
 		if (meetingpoint != null) {
 			self.mapview.removeAnnotation(meetingpoint);
 			meetingpoint = null;
 		}
 		console.log('info: creation of annotation');
-		meetingpoint = Ti.Map.createAnnotation({
+		meetingpoint = CriticalMap.createAnnotation({
 			latitude : _payload.latlng.split(',')[0],
 			longitude : _payload.latlng.split(',')[1],
 			title : _payload.android.alert,
@@ -62,16 +60,25 @@ exports.create = function() {
 			console.log('Error: no mapview');
 		}
 	};
+	var SmartMap = new (require('ui/smartmap.widget'))();
+	self.mapview = SmartMap.getView(mapoptions);
+	self.mapview.addEventListener('complete', function() {
+		require('vendor/address2region')(Ti.App.Properties.getString('CITY', 'Hamburg'), function(_region) {
+			self.mapview.setLocation(_region);
+		});
+	});
 	self.mapview.addEventListener('changed', function(_e) {
 		radlertext.setText(_e.text);
 	});
 	self.mapview.addEventListener('longclick', function(_e) {
-		self.mapview.setMapType((self.mapview.getMapType() == Ti.Map.NORMAL_TYPE) ? Ti.Map.TERRAIN_TYPE : Ti.Map.NORMAL_TYPE);
+		self.mapview.setMapType((self.mapview.getMapType() == CriticalMap.NORMAL_TYPE) ? CriticalMap.TERRAIN_TYPE : CriticalMap.NORMAL_TYPE);
 	});
+
 	self.addEventListener('focus', function() {
 		if (!ready) {
 			self.add(self.mapview);
 			ready = true;
+			SmartMap.startCron();
 		}
 	});
 	if (Ti.App.Properties.hasProperty('USER') && Ti.App.Properties.hasProperty('POSITION')) {
@@ -104,7 +111,7 @@ exports.create = function() {
 	self.setRoute = function() {
 		var routes = Ti.App.Sternfahrt.getAllRoutes();
 		for (var i = 0; i < routes.length; i++) {
-			self.mapview.addRoute(Ti.Map.createRoute(routes[i]));
+			self.mapview.addRoute(CriticalMap.createRoute(routes[i]));
 		};
 		self.remove(micro);
 	};
@@ -121,7 +128,7 @@ exports.create = function() {
 			duration : 700
 		});
 	};
-	SmartMap.startCron();
+
 	return self;
 };
 
