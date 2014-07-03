@@ -5,7 +5,7 @@ module.exports = function() {
 		var alarmManager = alarmModule.createAlarmManager();
 		alarmManager.cancelAlarmService();
 		alarmManager.addAlarmService({
-			service : 'de.appwerft.cm.Geo_serviceService',
+			service : 'de.appwerft.criticalmass.Geo_serviceService',
 			minute : 1, // until 1 minute it starts
 			requestCode : 41,
 			forceRestart : false,

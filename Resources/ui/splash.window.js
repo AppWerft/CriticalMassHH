@@ -4,6 +4,6 @@ module.exports = function(_callback) {
 	});
 	self.backgroundImage = '/assets/default.png';
 	self.open();
-	setTimeout(_callback, 5000);
+	_callback();
 	return self;
 };

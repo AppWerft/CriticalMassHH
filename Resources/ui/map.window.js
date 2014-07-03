@@ -73,7 +73,6 @@ exports.create = function() {
 	self.mapview.addEventListener('longclick', function(_e) {
 		self.mapview.setMapType((self.mapview.getMapType() == CriticalMap.NORMAL_TYPE) ? CriticalMap.TERRAIN_TYPE : CriticalMap.NORMAL_TYPE);
 	});
-
 	self.addEventListener('focus', function() {
 		if (!ready) {
 			self.add(self.mapview);

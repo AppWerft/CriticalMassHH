@@ -41,7 +41,7 @@ exports.get = function(self) {
 		if (!Ti.App.Properties.hasProperty('CITY')) {
 			require('ui/city.dialog').create(/*callback */
 			function(_city) {
-				if (_city) {
+				if (_city && activity.actionBar) {
 					activity.actionBar.setSubtitle(Ti.App.Properties.getString('CHATUSER')+'@'+_city);
 				}
 			});
